@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MAITRI • Reports</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* page-local tweaks to mirror the screenshots */
+    .page-title{margin:18px 0 6px;font-weight:900;font-size:54px;letter-spacing:.2px}
+    .subtitle{color:#8ccbe0;margin-top:0}
+    .panel-lg{padding:28px}
+    .seg{display:flex;gap:14px;flex-wrap:wrap}
+    .seg .btn{border-radius:999px;padding:.9rem 1.3rem}
+    .seg .btn.active{background:linear-gradient(100deg,var(--brand1),var(--brand2));color:#fff;box-shadow:0 10px 30px rgba(46,123,255,.50)}
+    .split{display:grid;grid-template-columns:1.2fr .9fr;gap:22px}
+    @media (max-width:1100px){ .split{grid-template-columns:1fr} }
+    .metric{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:16px 0}
+    .metric .bar{flex:1;margin:0 12px}
+    .insight{padding:16px;border-radius:16px;border:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(17,24,33,.85), rgba(17,24,33,.35))}
+    .insight.good{ box-shadow:0 0 0 1px rgba(32,227,178,.12) inset }
+    .insight.warn{ background:linear-gradient(180deg, rgba(60,40,10,.35), rgba(20,12,4,.25)); box-shadow:0 0 0 1px rgba(255,174,0,.18) inset }
+    .kpi .box strong{font-size:28px}
+    select, .select{
+      background:linear-gradient(180deg, rgba(18,24,32,.65), rgba(18,24,32,.35));
+      color:#e8f6ff;border:1px solid var(--stroke); border-radius:12px; padding:12px;
+      width:100%;
+    }
+    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+    @media (max-width:900px){ .actions{grid-template-columns:1fr} }
+    .btn-xl{padding:16px 20px;border-radius:18px}
+  </style>
+</head>
+<body>
+
+<script src="starfield.js"></script>
+<script src="chat.js"></script>
+
+<div class="wrap">
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="brand">
+      <div class="badge">🧠</div>
+      <div>
+        <div style="font-weight:800">MAITRI</div>
+        <div style="color:var(--muted);font-size:12px;margin-top:-2px">ASTRONAUT AI COMPANION</div>
+      </div>
+    </div>
+    <div>
+      <a href="index.html" class="">Home</a>
+      <a href="dashboard.html" class="">Dashboard</a>
+      <a href="emotion.html" class="">Detection</a>
+      <a href="interventions.html" class="">Interventions</a>
+      <a href="reports.html" class="active">Reports</a>
+    </div>
+    <a class="btn btn-primary" href="dashboard.html">Launch Mission Control</a>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="section" style="padding-top:26px">
+    <h1 class="page-title">Mission Reports</h1>
+    <p class="subtitle">📊 Comprehensive well-being analysis and insights</p>
+  </header>
+
+  <!-- GENERATE REPORT PANEL -->
+  <section class="panel panel-lg" style="margin-bottom:22px">
+    <h3 style="display:flex;align-items:center;gap:10px;margin-top:0">
+      <span class="badge" style="width:32px;height:32px;border-radius:10px">📄</span>
+      Generate Report
+    </h3>
+    <div class="split" style="margin-top:12px">
+      <!-- left: time period -->
+      <div>
+        <div style="opacity:.85;margin-bottom:8px">Time Period</div>
+        <div class="seg" id="rangeSeg">
+          <button class="btn btn-ghost" data-range="24h">Last 24 Hours</button>
+          <button class="btn btn-ghost active" data-range="week">Last Week</button>
+          <button class="btn btn-ghost" data-range="month">Last Month</button>
+          <button class="btn btn-ghost" data-range="quarter">Last Quarter</button>
+        </div>
+      </div>
+      <!-- right: crew member -->
+      <div>
+        <div style="opacity:.85;margin-bottom:8px">Crew Member</div>
+        <select id="crewSelect" class="select">
+          <option>All Crew Members</option>
+          <option>Commander Sharma</option>
+          <option>Dr. Patel</option>
+          <option>Engineer Kumar</option>
+          <option>Scientist Reddy</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <a id="btnGen" class="btn btn-primary btn-xl" href="#" style="display:block;text-align:center">
+        ⬇️ Generate &amp; Download Report
+      </a>
+    </div>
+  </section>
+
+  <!-- METRICS + INSIGHTS -->
+  <section class="split">
+    <!-- Overall Health Metrics -->
+    <div class="panel panel-lg">
+      <h3 style="display:flex;align-items:center;gap:10px;margin-top:0">
+        <span class="badge" style="width:32px;height:32px;border-radius:10px">🧪</span>
+        Overall Health Metrics
+      </h3>
+
+      <div class="metric">
+        <span>Physical Well-being</span>
+        <div class="bar"><span style="width:87%"></span></div>
+        <strong>87%</strong>
+      </div>
+      <div class="metric">
+        <span>Mental Health</span>
+        <div class="bar"><span style="width:82%"></span></div>
+        <strong>82%</strong>
+      </div>
+      <div class="metric">
+        <span>Emotional Stability</span>
+        <div class="bar"><span style="width:79%"></span></div>
+        <strong>79%</strong>
+      </div>
+      <div class="metric">
+        <span>Sleep Quality</span>
+        <div class="bar"><span style="width:75%"></span></div>
+        <strong>75%</strong>
+      </div>
+      <div class="metric">
+        <span>Stress Management</span>
+        <div class="bar" style="background:rgba(255,190,120,.18)">
+          <span style="width:84%;background:linear-gradient(90deg,#ffa94d,#e09a2d)"></span>
+        </div>
+        <strong>84%</strong>
+      </div>
+    </div>
+
+    <!-- Key Insights -->
+    <div class="panel panel-lg">
+      <h3 style="display:flex;align-items:center;gap:10px;margin-top:0">
+        <span class="badge" style="width:32px;height:32px;border-radius:10px">🧭</span>
+        Key Insights
+      </h3>
+      <div class="insight good" style="margin-top:10px">
+        <div style="font-weight:700;display:flex;gap:10px;align-items:center">✅ Improved Team Morale</div>
+        <small style="color:var(--muted)">Overall crew well-being increased by 12% this week</small>
+      </div>
+      <div class="insight warn" style="margin-top:12px">
+        <div style="font-weight:700;display:flex;gap:10px;align-items:center">⚠️ Sleep Disruption Detected</div>
+        <small style="color:#e7c991">2 crew members showing irregular sleep patterns</small>
+      </div>
+      <div class="insight good" style="margin-top:12px">
+        <div style="font-weight:700;display:flex;gap:10px;align-items:center">✅ Successful Interventions</div>
+        <small style="color:var(--muted)">24 sessions completed with 94% satisfaction</small>
+      </div>
+      <div class="insight" style="margin-top:12px">
+        <div style="font-weight:700;display:flex;gap:10px;align-items:center">📆 Routine Assessment Due</div>
+        <small style="color:var(--muted)">Quarterly psychological evaluation scheduled for next week</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- DETAILED STATS + EMOTION TRENDS -->
+  <section class="panel panel-lg" style="margin-top:22px">
+    <h3 style="display:flex;align-items:center;gap:10px;margin-top:0">
+      <span class="badge" style="width:32px;height:32px;border-radius:10px">📈</span>
+      Detailed Statistics
+    </h3>
+
+    <div class="kpi" style="margin-top:12px">
+      <div class="box">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge" style="width:34px;height:34px;border-radius:10px">📡</span> Total Scans</div>
+        <strong>156</strong><small>+23%</small>
+      </div>
+      <div class="box">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge" style="width:34px;height:34px;border-radius:10px">🧠</span> Interventions</div>
+        <strong>24</strong><small>+8%</small>
+      </div>
+      <div class="box">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge" style="width:34px;height:34px;border-radius:10px">✅</span> Alerts Resolved</div>
+        <strong>18</strong><small>+15%</small>
+      </div>
+      <div class="box">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge" style="width:34px;height:34px;border-radius:10px">📈</span> Avg Response Time</div>
+        <strong>&lt;2min</strong><small>-12%</small>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h3 style="margin-top:0;display:flex;align-items:center;gap:10px">
+        <span class="badge" style="width:30px;height:30px;border-radius:9px">📊</span>
+        Emotion Trends (Last 7 Days)
+      </h3>
+
+      <div class="metric"><span>Happy</span>   <div class="bar"><span style="width:80%"></span></div> <strong>45%</strong></div>
+      <div class="metric"><span>Calm</span>    <div class="bar"><span style="width:60%"></span></div> <strong>32%</strong></div>
+      <div class="metric"><span>Focused</span> <div class="bar"><span style="width:54%"></span></div> <strong>28%</strong></div>
+      <div class="metric"><span>Stressed</span><div class="bar" style="background:rgba(255,190,120,.18)"><span style="width:36%;background:linear-gradient(90deg,#ffa94d,#e09a2d)"></span></div> <strong>18%</strong></div>
+      <div class="metric"><span>Anxious</span> <div class="bar"><span style="width:24%"></span></div> <strong>12%</strong></div>
+      <div class="metric"><span>Sad</span>     <div class="bar"><span style="width:16%"></span></div> <strong>8%</strong></div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-ghost btn-xl" href="#">🖨 Export as PDF</a>
+      <a class="btn btn-ghost btn-xl" href="#">📄 Export as CSV</a>
+      <a class="btn btn-ghost btn-xl" href="#">🗓 Schedule Report</a>
+    </div>
+  </section>
+
+</div>
+
+<!-- Floating Companion (same as other pages) -->
+<button id="astroChatBtn" title="MAITRI Companion" class="btn">💬</button>
+<div id="astroChatPane" class="panel" style="position:fixed;right:22px;bottom:90px;width:360px;max-height:70vh;display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div style="display:flex;align-items:center;gap:8px"><div class="badge">🧠</div><strong>MAITRI Companion</strong></div>
+    <button id="closeAstro" class="btn btn-ghost">×</button>
+  </div>
+  <div id="astroLog" style="overflow:auto;height:300px;font-size:14px">
+    <div><em>👋 Namaste, Commander. I can chat like family, track vitals, and suggest interventions.</em></div>
+  </div>
+  <div class="chips"><button class="chipbtn" data-msg="I'm stressed">I'm stressed</button><button class="chipbtn" data-msg="I miss my family">I miss my family</button><button class="chipbtn" data-msg="I can't sleep">I can't sleep</button></div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <input id="astroInput" placeholder="Type a message…" style="flex:1;border-radius:12px;border:1px solid var(--stroke);padding:10px;background:transparent;color:#fff">
+    <button id="astroSend" class="btn btn-primary">Send</button>
+  </div>
+</div>
+
+<script>
+/* chat + quick replies (same behavior as other pages) */
+(function(){
+  const btn=document.getElementById('astroChatBtn'), pane=document.getElementById('astroChatPane');
+  const close=document.getElementById('closeAstro'), log=document.getElementById('astroLog');
+  const input=document.getElementById('astroInput'), send=document.getElementById('astroSend');
+  btn.style.position='fixed'; btn.style.right='22px'; btn.style.bottom='22px'; btn.classList.add('btn-primary'); btn.style.border='none'; btn.style.borderRadius='50%'; btn.style.width='58px'; btn.style.height='58px';
+  function toggle(){ if(!pane.style.display || pane.style.display==='none'){ pane.style.display='block'; pane.animate([{transform:'translateY(20px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:220,easing:'ease-out'});} else { pane.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(20px)',opacity:0}],{duration:180,easing:'ease-in'}).onfinish=()=>{pane.style.display='none';};} }
+  btn.addEventListener('click',toggle); close.addEventListener('click',toggle);
+  function push(sender,text){ const d=document.createElement('div'); d.style.margin='6px 0'; d.innerHTML=sender+': '+text; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+  function typing(){ const dot=document.createElement('div'); dot.id='typing'; dot.style.opacity='.8'; dot.innerHTML='<em>MAITRI is typing…</em>'; log.appendChild(dot); log.scrollTop=log.scrollHeight; return dot; }
+  function reply(t){ t=t.toLowerCase();
+    if(t.includes('stress')) return 'Breathing 5 min + Mindfulness 10 min are recommended. Start session?';
+    if(t.includes('family')||t.includes('home')) return 'I am here with you. Want me to play a family-style message and soft music?';
+    if(t.includes('sleep')) return 'Target 7–8h sleep. I can dim UI and queue a soundscape.';
+    return 'Logged. I can also open Interventions or start an Emotion Scan.';
+  }
+  function sendNow(){ const val=input.value.trim(); if(!val) return; push('<strong>You</strong>', val); const tip=typing(); setTimeout(()=>{ tip.remove(); push('<strong>MAITRI</strong>', reply(val)); }, 700); input.value=''; }
+  send.addEventListener('click', sendNow); input.addEventListener('keydown', e=>{ if(e.key==='Enter') sendNow(); });
+  document.querySelectorAll('.chipbtn').forEach(b=>b.addEventListener('click',()=>{ input.value=b.dataset.msg; sendNow(); }));
+})();
+
+/* pill selector & fake downloader */
+(function(){
+  const seg=document.getElementById('rangeSeg');
+  seg.addEventListener('click', e=>{
+    const b=e.target.closest('.btn'); if(!b) return;
+    [...seg.querySelectorAll('.btn')].forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
+
+  const gen=document.getElementById('btnGen');
+  gen.addEventListener('click', (e)=>{
+    e.preventDefault();
+    gen.textContent='Preparing report…';
+    gen.style.pointerEvents='none';
+    setTimeout(()=>{
+      gen.textContent='⬇️ Generate & Download Report';
+      gen.style.pointerEvents='auto';
+      alert('Report ready (demo). Tie this to your real generator when API/device is available.');
+    }, 1200);
+  });
+})();
+
+/* global ripple for .btn (shared pattern) */
+(function(){
+  function addRipple(e){
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const span = document.createElement('span');
+    span.className = 'ripple';
+    span.style.left = x + 'px';
+    span.style.top = y + 'px';
+    btn.appendChild(span);
+    setTimeout(()=> span.remove(), 650);
+  }
+  document.addEventListener('click', function(e){
+    const t = e.target.closest('.btn');
+    if(t) addRipple({currentTarget:t, clientX:e.clientX, clientY:e.clientY});
+  }, true);
+})();
+</script>
+</body>
+</html>

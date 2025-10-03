@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MAITRI • Detection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+<!-- Falling stars like the other pages -->
+<script src="starfield.js"></script>
+<script src="chat.js"></script>
+
+
+<div class="wrap">
+  <!-- ===== NAV ===== -->
+  <nav class="nav">
+    <div class="brand">
+      <div class="badge">🧠</div>
+      <div>
+        <div style="font-weight:800">MAITRI</div>
+        <div style="color:var(--muted);font-size:12px;margin-top:-2px">ASTRONAUT AI COMPANION</div>
+      </div>
+    </div>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="emotion.html" class="active">Detection</a>
+      <a href="interventions.html">Interventions</a>
+      <a href="reports.html">Reports</a>
+    </div>
+    <a class="btn btn-primary btn-pill" href="dashboard.html">Launch Mission Control</a>
+  </nav>
+
+  <!-- ===== PAGE TITLE ===== -->
+  <section class="section" style="padding-top:22px">
+    <h1 style="font-size:54px;margin:0 0 6px">Emotion Detection System</h1>
+    <div style="display:flex;align-items:center;gap:10px;color:#7fb9ff">
+      <span>📡</span>
+      <span>Real-time multimodal emotion analysis using advanced AI</span>
+    </div>
+  </section>
+
+  <!-- ===== VIDEO + EMOTION BARS ===== -->
+  <section class="row section">
+    <!-- Left: Video Feed -->
+    <div class="panel" style="position:relative">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <h3 style="display:flex;align-items:center;gap:10px;margin:0"><span>📷</span>Video Feed</h3>
+        <span id="camState" class="chip" style="padding:6px 12px">● Standby</span>
+      </div>
+
+      <div class="card" style="height:320px;display:grid;place-items:center;opacity:.95;position:relative;overflow:hidden">
+        <video id="video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;border-radius:16px;filter:saturate(0.95)"></video>
+        <!-- face overlay (optional) -->
+        <canvas id="faceCanvas" style="position:absolute;inset:0;"></canvas>
+        <div id="videoPlaceholder" style="position:absolute;color:#7fb9ff;display:none">Camera feed will appear here</div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button id="btnCam" class="btn btn-primary btn-pill">▶ Start Detection</button>
+        <button id="btnMic" class="btn btn-ghost btn-pill">🎙️ Start Voice</button>
+      </div>
+    </div>
+
+    <!-- Right: Emotion Analysis -->
+    <div class="panel">
+      <h3 style="margin:0 0 8px">Emotion Analysis</h3>
+
+      <div style="margin:10px 0;display:flex;align-items:center;gap:10px">
+        <div style="min-width:110px">Happy</div>
+        <div class="bar" style="flex:1"><span id="barHappy" style="width:17%;background:linear-gradient(90deg,#33e37a,#28c76f)"></span></div>
+        <div style="min-width:46px;text-align:right"><small id="valHappy">17%</small></div>
+      </div>
+
+      <div style="margin:10px 0;display:flex;align-items:center;gap:10px">
+        <div style="min-width:110px">Calm</div>
+        <div class="bar" style="flex:1"><span id="barCalm" style="width:27%"></span></div>
+        <div style="min-width:46px;text-align:right"><small id="valCalm">27%</small></div>
+      </div>
+
+      <div style="margin:10px 0;display:flex;align-items:center;gap:10px">
+        <div style="min-width:110px">Focused</div>
+        <div class="bar" style="flex:1"><span id="barFocused" style="width:0%"></span></div>
+        <div style="min-width:46px;text-align:right"><small id="valFocused">0%</small></div>
+      </div>
+
+      <div style="margin:10px 0;display:flex;align-items:center;gap:10px">
+        <div style="min-width:110px">Stressed</div>
+        <div class="bar" style="flex:1;background:rgba(255,190,120,.18)"><span id="barStressed" style="width:10%;background:linear-gradient(90deg,#ffa94d,#e09a2d)"></span></div>
+        <div style="min-width:46px;text-align:right"><small id="valStressed">10%</small></div>
+      </div>
+
+      <div style="margin:10px 0;display:flex;align-items:center;gap:10px">
+        <div style="min-width:110px">Anxious</div>
+        <div class="bar" style="flex:1"><span id="barAnxious" style="width:9%;background:linear-gradient(90deg,#ff6e6e,#d94a4a)"></span></div>
+        <div style="min-width:46px;text-align:right"><small id="valAnxious">9%</small></div>
+      </div>
+
+      <div style="margin:10px 0;display:flex;align-items:center;gap:10px">
+        <div style="min-width:110px">Sad</div>
+        <div class="bar" style="flex:1"><span id="barSad" style="width:3%;background:linear-gradient(90deg,#b1c3d6,#8ea5bd)"></span></div>
+        <div style="min-width:46px;text-align:right"><small id="valSad">3%</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VOICE ANALYSIS ===== -->
+  <section class="section">
+    <div class="panel">
+      <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 8px"><span>🎧</span>Voice Analysis</h3>
+
+      <div style="display:grid;gap:12px">
+        <!-- Voice Tone -->
+        <div style="display:grid;grid-template-columns:180px 1fr 100px;gap:12px;align-items:center">
+          <div>Voice Tone</div>
+          <div class="bar"><span id="barTone" style="width:0%"></span></div>
+          <div style="text-align:right"><strong id="labelTone">Stable</strong></div>
+        </div>
+
+        <!-- Speech Rate -->
+        <div style="display:grid;grid-template-columns:180px 1fr 100px;gap:12px;align-items:center">
+          <div>Speech Rate</div>
+          <div class="bar"><span id="barRate" style="width:0%"></span></div>
+          <div style="text-align:right"><strong id="labelRate">Normal</strong></div>
+        </div>
+
+        <!-- Pitch Variation -->
+        <div style="display:grid;grid-template-columns:180px 1fr 100px;gap:12px;align-items:center">
+          <div>Pitch Variation</div>
+          <div class="bar"><span id="barVar" style="width:0%"></span></div>
+          <div style="text-align:right"><strong id="labelVar">Moderate</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BOTTOM CTA ===== -->
+  <div class="section" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a class="btn btn-primary btn-pill" href="dashboard.html">Back to Dashboard</a>
+    <a class="btn btn-ghost btn-pill" href="interventions.html">Open Interventions</a>
+  </div>
+</div>
+
+<!-- ===== Companion Bot (same behavior as other pages) ===== -->
+<button id="astroChatBtn" title="MAITRI Companion" class="btn btn-primary" aria-label="Open MAITRI Companion" style="position:fixed;right:22px;bottom:22px;border:none;border-radius:50%;width:58px;height:58px">💬</button>
+<div id="astroChatPane" class="panel" style="position:fixed;right:22px;bottom:90px;width:360px;max-height:70vh;display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div style="display:flex;align-items:center;gap:8px"><div class="badge">🧠</div><strong>MAITRI Companion</strong></div>
+    <button id="closeAstro" class="btn btn-ghost">×</button>
+  </div>
+  <div id="astroLog" style="overflow:auto;height:300px;font-size:14px">
+    <div><em>👋 Namaste, Commander. I can chat like family, track vitals, and suggest interventions.</em></div>
+  </div>
+  <div class="chips" style="margin-top:8px">
+    <button class="chipbtn" data-msg="I'm stressed">I’m stressed</button>
+    <button class="chipbtn" data-msg="I miss my family">I miss my family</button>
+    <button class="chipbtn" data-msg="I can't sleep">I can’t sleep</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <input id="astroInput" placeholder="Type a message…" style="flex:1;border-radius:12px;border:1px solid var(--stroke);padding:10px;background:transparent;color:#fff">
+    <button id="astroSend" class="btn btn-primary">Send</button>
+  </div>
+</div>
+
+<!-- ===== Bot logic ===== -->
+<script>
+(function(){
+  const pane = document.getElementById('astroChatPane');
+  document.getElementById('astroChatBtn').addEventListener('click', toggle);
+  document.getElementById('closeAstro').addEventListener('click', toggle);
+  function toggle(){
+    if(pane.style.display==='none' || !pane.style.display){
+      pane.style.display='block';
+      pane.animate([{transform:'translateY(20px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:220,easing:'ease-out'});
+    }else{
+      pane.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(20px)',opacity:0}],{duration:180,easing:'ease-in'}).onfinish=()=>pane.style.display='none';
+    }
+  }
+
+  const log=document.getElementById('astroLog');
+  const input=document.getElementById('astroInput');
+  const send=document.getElementById('astroSend');
+
+  function push(sender,text){
+    const d=document.createElement('div'); d.style.margin='6px 0'; d.innerHTML=sender+': '+text;
+    log.appendChild(d); log.scrollTop=log.scrollHeight;
+  }
+  function typing(){ const n=document.createElement('div'); n.id='typing'; n.style.opacity='.8'; n.innerHTML='<em>MAITRI is typing…</em>'; log.appendChild(n); log.scrollTop=log.scrollHeight; return n; }
+  function reply(t){
+    t=t.toLowerCase();
+    if(t.includes('stress')) return 'Breathing 5 min + Mindfulness 10 min are recommended. Start session?';
+    if(t.includes('family')||t.includes('home')) return 'I’m here with you. Want me to play a family-style message and soft music?';
+    if(t.includes('sleep')) return 'Target 7–8h sleep. I can dim UI and queue a soundscape.';
+    return 'Logged. I can also open Interventions or start an Emotion Scan.';
+  }
+  function sendNow(){
+    const val=input.value.trim(); if(!val) return;
+    push('<strong>You</strong>', val);
+    const tip=typing();
+    setTimeout(()=>{ tip.remove(); push('<strong>MAITRI</strong>', reply(val)); }, 700);
+    input.value='';
+  }
+  send.addEventListener('click', sendNow);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') sendNow(); });
+  document.querySelectorAll('.chipbtn').forEach(b=>b.addEventListener('click',()=>{ input.value=b.dataset.msg; sendNow(); }));
+})();
+</script>
+
+<!-- ===== Button ripple feedback ===== -->
+<script>
+(function(){
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.btn');
+    if(!btn) return;
+    const r = btn.getBoundingClientRect();
+    const span = document.createElement('span');
+    span.className = 'ripple';
+    span.style.left = (e.clientX - r.left) + 'px';
+    span.style.top  = (e.clientY - r.top)  + 'px';
+    btn.appendChild(span);
+    setTimeout(()=>span.remove(), 650);
+  }, true);
+})();
+</script>
+
+<!-- ===== CAMERA + VOICE SENSORS ===== -->
+<script>
+(function(){
+  const video = document.getElementById('video');
+  const faceCanvas = document.getElementById('faceCanvas');
+  const ctx = faceCanvas.getContext('2d');
+  const camState = document.getElementById('camState');
+  const btnCam = document.getElementById('btnCam');
+  const btnMic = document.getElementById('btnMic');
+  const placeholder = document.getElementById('videoPlaceholder');
+
+  let camStream = null;
+  let micStream = null;
+  let analyser = null, audioCtx = null, srcNode = null;
+  let rafId = null, faceRaf = null;
+
+  // emotion bars
+  const bars = {
+    Happy: {el: document.getElementById('barHappy'), val: document.getElementById('valHappy'), v:17},
+    Calm: {el: document.getElementById('barCalm'), val: document.getElementById('valCalm'), v:27},
+    Focused: {el: document.getElementById('barFocused'), val: document.getElementById('valFocused'), v:0},
+    Stressed: {el: document.getElementById('barStressed'), val: document.getElementById('valStressed'), v:10},
+    Anxious: {el: document.getElementById('barAnxious'), val: document.getElementById('valAnxious'), v:9},
+    Sad: {el: document.getElementById('barSad'), val: document.getElementById('valSad'), v:3},
+  };
+
+  // voice bars & labels
+  const barTone = document.getElementById('barTone');
+  const barRate = document.getElementById('barRate');
+  const barVar  = document.getElementById('barVar');
+  const labelTone = document.getElementById('labelTone');
+  const labelRate = document.getElementById('labelRate');
+  const labelVar  = document.getElementById('labelVar');
+
+  // Smoothly set % width
+  function setBar(b, pct){
+    b.v = Math.max(0, Math.min(100, pct));
+    b.el.style.width = b.v + '%';
+    b.val.textContent = Math.round(b.v) + '%';
+  }
+
+  async function startCam(){
+    if(camStream) return stopCam(); // toggle
+    try{
+      camStream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}}, audio:false});
+      video.srcObject = camStream;
+      placeholder.style.display = 'none';
+      camState.textContent = '● Live';
+      camState.style.background = 'linear-gradient(180deg, rgba(18,24,32,.65), rgba(18,24,32,.35))';
+      btnCam.textContent = '■ Stop Detection';
+      // match canvas size to video
+      function fitCanvas(){
+        const r = video.getBoundingClientRect();
+        faceCanvas.width = r.width * devicePixelRatio;
+        faceCanvas.height = r.height * devicePixelRatio;
+        faceCanvas.style.width = r.width + 'px';
+        faceCanvas.style.height = r.height + 'px';
+        ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      }
+      fitCanvas(); addEventListener('resize', fitCanvas);
+
+      // optional FaceDetector
+      if('FaceDetector' in window){
+        const fd = new FaceDetector({fastMode:true, maxDetectedFaces:4});
+        const draw = async () => {
+          if(!camStream) return;
+          try{
+            const faces = await fd.detect(video);
+            ctx.clearRect(0,0,faceCanvas.width, faceCanvas.height);
+            for(const f of faces){
+              const {x,y,width,height} = f.boundingBox;
+              ctx.strokeStyle = 'rgba(127,185,255,.95)';
+              ctx.lineWidth = 2;
+              ctx.shadowColor = 'rgba(46,123,255,.6)';
+              ctx.shadowBlur = 8;
+              ctx.strokeRect(x,y,width,height);
+              // nudge emotions a bit when faces present
+              setBar(bars.Focused, bars.Focused.v + 0.15);
+              setBar(bars.Calm,    bars.Calm.v    + 0.05);
+            }
+          }catch(e){ /* ignore */ }
+          faceRaf = requestAnimationFrame(draw);
+        };
+        draw();
+      }
+    }catch(err){
+      console.warn(err);
+      camState.textContent = '● Permission needed';
+      placeholder.style.display = 'block';
+    }
+  }
+  function stopCam(){
+    if(faceRaf) cancelAnimationFrame(faceRaf);
+    faceRaf=null;
+    if(camStream){
+      camStream.getTracks().forEach(t=>t.stop());
+      camStream = null;
+    }
+    video.srcObject = null;
+    camState.textContent = '● Standby';
+    btnCam.textContent = '▶ Start Detection';
+    ctx.clearRect(0,0,faceCanvas.width, faceCanvas.height);
+    placeholder.style.display = 'block';
+  }
+
+  async function startMic(){
+    if(micStream) return stopMic(); // toggle
+    try{
+      micStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      srcNode = audioCtx.createMediaStreamSource(micStream);
+      srcNode.connect(analyser);
+
+      btnMic.textContent = '■ Stop Voice';
+      // metrics buffers
+      const buf = new Float32Array(analyser.fftSize);
+      const time = new Float32Array(analyser.fftSize);
+      let lastPeaks = [], lastPitch=0, pitchSdBuf=[];
+
+      function autoCorr(samples, sampleRate){
+        // simple autocorrelation peak to estimate pitch
+        let bestLag = 0, best = 0;
+        const size = samples.length;
+        for(let lag=50; lag<=500; lag++){ // ~40–800 Hz
+          let sum = 0;
+          for(let i=0;i<size-lag;i++){ sum += samples[i]*samples[i+lag]; }
+          if(sum > best){ best = sum; bestLag = lag; }
+        }
+        return bestLag? sampleRate/bestLag : 0;
+      }
+
+      const sampleRate = audioCtx.sampleRate;
+      const loop = () => {
+        if(!analyser) return;
+        analyser.getFloatTimeDomainData(time);
+
+        // energy
+        let rms = 0; for(let i=0;i<time.length;i++){ rms += time[i]*time[i]; }
+        rms = Math.sqrt(rms/time.length);
+
+        // detect speech peaks (very rough)
+        const TH = 0.04;
+        const speaking = rms > TH;
+        const now = performance.now();
+        if(speaking && (lastPeaks.length===0 || now - lastPeaks[lastPeaks.length-1] > 250)){
+          lastPeaks.push(now);
+          // keep last 60s
+          while(lastPeaks.length && now - lastPeaks[0] > 60000) lastPeaks.shift();
+        }
+        const ratePerMin = Math.min(120, Math.max(0, lastPeaks.length));
+        barRate.style.width = (ratePerMin/120*100).toFixed(1) + '%';
+        labelRate.textContent = ratePerMin<25 ? 'Calm' : ratePerMin<60 ? 'Normal' : 'Fast';
+
+        // pitch estimate
+        const pitch = autoCorr(time, sampleRate);
+        if(pitch>60 && pitch<400){ lastPitch = pitch; pitchSdBuf.push(pitch); }
+        while(pitchSdBuf.length>40) pitchSdBuf.shift();
+        // tone map ~ 80–280 Hz
+        const normTone = Math.max(0, Math.min(1, (lastPitch-80)/(280-80)));
+        barTone.style.width = (normTone*100).toFixed(1) + '%';
+        labelTone.textContent = lastPitch ? (lastPitch<140?'Low':'Stable') : 'Stable';
+
+        // pitch variation (std dev of last window)
+        if(pitchSdBuf.length>8){
+          const avg = pitchSdBuf.reduce((a,b)=>a+b,0)/pitchSdBuf.length;
+          const sd = Math.sqrt(pitchSdBuf.reduce((a,b)=>a+(b-avg)*(b-avg),0)/pitchSdBuf.length);
+          const normVar = Math.max(0, Math.min(1, sd/60)); // 0..~60 Hz
+          barVar.style.width = (normVar*100).toFixed(1) + '%';
+          labelVar.textContent = normVar<.25?'Low': normVar<.6?'Moderate':'High';
+          // small emotional nudge from voice: calmer tone lowers stressed/anxious
+          setBar(bars.Stressed, bars.Stressed.v - (1 - normTone)*0.3);
+          setBar(bars.Anxious,  bars.Anxious.v  - (1 - normTone)*0.25);
+          setBar(bars.Calm,     bars.Calm.v     + (1 - normVar)*0.35);
+        }
+
+        rafId = requestAnimationFrame(loop);
+      };
+      loop();
+    }catch(err){
+      console.warn(err);
+      btnMic.textContent = '🎙️ Mic blocked';
+    }
+  }
+  function stopMic(){
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId=null;
+    if(analyser){ analyser.disconnect(); analyser=null; }
+    if(srcNode){ srcNode.disconnect(); srcNode=null; }
+    if(audioCtx){ audioCtx.close(); audioCtx=null; }
+    if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+    btnMic.textContent = '🎙️ Start Voice';
+  }
+
+  btnCam.addEventListener('click', startCam);
+  btnMic.addEventListener('click', startMic);
+
+  // tiny, pleasant idle animation for bars (when sensors off)
+  setInterval(()=>{
+    if(!camStream && !micStream){
+      for(const k in bars){
+        const b = bars[k];
+        const jitter = (Math.random()-.5)*0.6;
+        setBar(b, b.v + jitter);
+      }
+    }
+  }, 900);
+})();
+</script>
+
+</body>
+</html>
