@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Tailwind preflight + utilities - project uses Tailwind, include directives */
+
+/* small helpers used by the Emotion component */
+
+/* For Chrome, Safari, and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* For IE, Edge, and Firefox */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html {
+  scroll-behavior: smooth !important;
+}
+.report-content {
+  scroll-behavior: smooth !important;
+}
+
+.ripple {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  transform: translate(-50%, -50%) scale(0.6);
+  animation: ripple-anim 650ms ease-out;
+  pointer-events: none;
+}
+@keyframes ripple-anim {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6);
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Styles for recently clicked nav link */
+.nav-last-clicked {
+  color: #7c3aed; /* indigo-600 */
+  transition: transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1), color 260ms ease;
+  transform-origin: center bottom;
+}
+
+.nav-last-clicked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%) scaleX(0);
+  height: 3px;
+  width: 40px;
+  background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+  border-radius: 9999px;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.18);
+  transition: transform 360ms cubic-bezier(0.2, 0.9, 0.2, 1), opacity 360ms;
+  opacity: 0.98;
+}
+
+.nav-last-clicked.animate-pop {
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* small pulse when added */
+@keyframes nav-pop {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-6px) scale(1.06);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.nav-last-clicked.nav-animated {
+  animation: nav-pop 420ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.nav-last-clicked::after {
+  transform-origin: center;
+}
+
+.nav-last-clicked {
+  /* ensure stacking context for pseudo-element */
+  z-index: 1;
+}
