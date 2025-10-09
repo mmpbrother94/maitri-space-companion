@@ -1,0 +1,191 @@
+:root{
+  --bg:#070b10;
+  --text:#e8f6ff;
+  --muted:#9cc9d8;
+  --glass:rgba(16,22,30,.65);
+  --glass2:rgba(16,22,30,.35);
+  --stroke:rgba(255,255,255,.08);
+  --brand1:#10b2d6;
+  --brand2:#2e7bff;
+  --ok:#20e3b2;
+  --warn:#e09a2d;
+  --radius:22px;
+}
+
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  background:#000;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(900px 600px at 15% 85%, #1a0f08 0%, transparent 55%),
+    radial-gradient(1100px 700px at 85% 10%, #0b1c22 0%, transparent 60%);
+}
+.wrap{max-width:1220px; margin:0 auto; padding:24px}
+
+/* Navigation */
+.nav{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  position:sticky; top:16px; z-index:60;
+  padding:10px 14px; border:1px solid var(--stroke); border-radius:calc(var(--radius) + 6px);
+  background:linear-gradient(180deg, rgba(13,18,26,.85), rgba(13,18,26,.35));
+  backdrop-filter: blur(22px);
+  box-shadow: 0 0 24px rgba(32,195,255,.18);
+}
+.brand{display:flex; align-items:center; gap:10px}
+.badge{
+  width:36px; height:36px; border-radius:12px; display:grid; place-items:center;
+  color:#fff; font-weight:900;
+  background:linear-gradient(135deg, #51e1ff, #2e7bff);
+  box-shadow: 0 0 24px rgba(46,123,255,.35);
+}
+.nav a{color:var(--muted); text-decoration:none; font-weight:600; margin:0 10px}
+.nav a.active{color:#fff; text-shadow:0 0 14px rgba(46,123,255,.55)}
+
+/* Hero */
+.hero{padding:110px 0 60px; text-align:center}
+.chip{
+  display:inline-flex; align-items:center; gap:8px; padding:10px 16px;
+  border-radius:999px; border:1px solid var(--stroke); background:rgba(11,17,24,.66)
+}
+.h1{font-size:76px; line-height:1.05; margin:18px 0}
+.h1 .muted{color:#7fb9ff}
+.lead{max-width:900px; margin:16px auto 24px; color:#b6d6e4; font-size:20px}
+
+/* Layout cards/panels */
+.grid{display:grid; gap:22px; grid-template-columns:repeat(3, 1fr); margin:48px 0}
+@media (max-width:980px){ .grid{grid-template-columns:1fr} .h1{font-size:46px} }
+
+.card{
+  padding:24px; border-radius:var(--radius); border:1px solid var(--stroke);
+  background:
+    radial-gradient(1200px 700px at 20% -20%, rgba(32,195,255,.15), transparent 35%),
+    linear-gradient(180deg, rgba(17,24,33,.8), rgba(17,24,33,.35));
+  box-shadow:0 10px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.02) inset;
+}
+
+.panel{
+  padding:22px; border-radius:var(--radius); border:1px solid var(--stroke);
+  background:linear-gradient(180deg, rgba(17,24,33,.8), rgba(17,24,33,.35));
+}
+
+.section{padding:40px 0}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:22px}
+@media (max-width:980px){ .row{grid-template-columns:1fr} }
+
+.footer{ margin:84px auto 32px; padding:24px; text-align:center }
+.kpi{display:grid; grid-template-columns: repeat(4,1fr); gap:16px}
+.kpi .box{
+  padding:18px; border-radius:16px; border:1px solid var(--stroke);
+  background:linear-gradient(180deg, rgba(17,24,33,.8), rgba(17,24,33,.35))
+}
+
+ul{margin:10px 0 0 18px; color:#cfe6f2}
+small{color:#a6c9d6}
+
+/* Quick-reply chips (chat + readiness badges) */
+.chips{ display:flex; gap:8px; flex-wrap:wrap; }
+.chipbtn{
+  border-radius:999px; padding:8px 12px; border:1px solid var(--stroke);
+  background:linear-gradient(180deg, var(--glass), var(--glass2));
+  color:var(--text); cursor:pointer; font-weight:600;
+}
+.chipbtn:hover{ box-shadow:0 0 18px rgba(46,123,255,.35) }
+
+/* === Next-gen Buttons (CTA) === */
+.btn{
+  position:relative; display:inline-flex; align-items:center; gap:10px;
+  padding:16px 26px; font-weight:800; letter-spacing:.2px;
+  border-radius:20px; border:1px solid var(--stroke);
+  cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+  overflow:hidden; isolation:isolate;
+  transition:transform .15s ease, box-shadow .35s ease, filter .35s ease;
+}
+.btn:active{ transform: translateY(.5px) scale(.997); }
+
+.btn-primary{
+  color:#fff;
+  background:
+    radial-gradient(120% 200% at -20% 0%, rgba(16,178,214,.35), transparent 40%),
+    linear-gradient(97deg, var(--brand1) 0%, var(--brand2) 100%);
+  box-shadow:0 12px 34px rgba(46,123,255,.45), 0 0 0 1px rgba(255,255,255,.10) inset;
+}
+.btn-primary:hover{
+  filter:saturate(1.12);
+  transform:translateY(-1px);
+  box-shadow:0 18px 44px rgba(46,123,255,.55), 0 0 0 1px rgba(255,255,255,.14) inset;
+}
+/* shine sweep */
+.btn-primary::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(120deg, rgba(255,255,255,.22), rgba(255,255,255,0) 55%);
+  transform:translateX(-120%);
+  transition:transform .65s cubic-bezier(.22,.61,.36,1);
+  mix-blend-mode:screen; pointer-events:none;
+}
+.btn-primary:hover::after{ transform:translateX(120%); }
+
+/* ghost */
+.btn-ghost{
+  color:#e8f6ff;
+  background:linear-gradient(180deg, rgba(18,24,32,.85), rgba(18,24,32,.45));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 8px 22px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
+}
+.btn-ghost:hover{
+  filter:saturate(1.06); transform:translateY(-1px);
+  box-shadow:0 12px 28px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08) inset;
+}
+
+/* sizes & icon slot */
+.btn-pill{ border-radius:999px; padding:18px 30px; font-size:18px; }
+.btn .icon{ width:24px; height:24px; display:inline-grid; place-items:center;
+  filter:drop-shadow(0 0 6px rgba(46,123,255,.45)); }
+
+/* ripple feedback (span.ripple is injected by JS) */
+.btn .ripple{
+  position:absolute; border-radius:50%; pointer-events:none; transform:translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(255,255,255,.45), rgba(255,255,255,.15) 40%, transparent 60%);
+  animation:ripple .6s ease-out forwards; z-index:-1;
+}
+@keyframes ripple{ from{width:0;height:0;opacity:.7} to{width:360px;height:360px;opacity:0} }
+
+/* Focus ring (keyboard) */
+.btn:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 2px rgba(32,227,178,.55), 0 0 0 6px rgba(32,227,178,.18);
+}
+
+/* ===== a11y: focus visibility & larger hit area ===== */
+.btn:focus-visible,
+.nav a:focus-visible,
+.chipbtn:focus-visible {
+  outline: 2px solid var(--brand2);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(46,123,255,.35);
+}
+
+.btn { min-height: 44px; }
+
+/* ===== prefers-reduced-motion: respect user setting ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn .ripple { animation: none !important; }
+  /* If you want to completely hide the starfield for reduced motion, uncomment: */
+  /* #starfield { display: none !important; } */
+}
+
+/* ===== high-contrast outline when using keyboard ===== */
+:focus-visible {
+  outline: 2px solid var(--brand1);
+  outline-offset: 2px;
+}
