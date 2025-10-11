@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import Starfield from "../utils/Starfield";
+import { useLaunch } from "../components/launch/useLaunch";
 
 // Simple chart component for performance
 const MiniChart = ({ data, type = "line", color = "#38bdf8" }) => {
@@ -120,9 +121,43 @@ const HealthMetricCard = ({ title, value, unit, trend, color = "#38bdf8", miniDa
 };
 
 export default function Index() {
+  const navigate = useNavigate();
+  const { play } = useLaunch();
   const [activeFeature, setActiveFeature] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef(null);
+
+  const handleLaunch = useCallback(
+    (event) => {
+      event.preventDefault();
+      const prefersReduced =
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+      if (prefersReduced) {
+        navigate("/dashboard");
+        return;
+      }
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        navigate("/dashboard");
+      };
+      const fallback = window.setTimeout(finish, 2600);
+      try {
+        play({
+          timeoutMs: 2000,
+          onDone: () => {
+            window.clearTimeout(fallback);
+            finish();
+          },
+        });
+      } catch (error) {
+        window.clearTimeout(fallback);
+        finish();
+      }
+    },
+    [navigate, play],
+  );
 
   useEffect(() => {
     document.title = "MAITRI • Home";
@@ -727,7 +762,10 @@ export default function Index() {
         </div>
 
         <NavLink to={'/dashboard'}
-          onClick={createRipple}
+          onClick={(event) => {
+            createRipple(event);
+            handleLaunch(event);
+          }}
           className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-500 text-white rounded-full px-6 py-3 font-semibold shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2 group"
         >
           <span  style={{ filter: "drop-shadow(0 0 8px rgba(56,189,248,0.6))" }}>

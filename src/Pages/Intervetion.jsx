@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { NavLink, useOutletContext } from "react-router-dom";
+import { generateSupportResponse } from "../utils/chatResponses";
 import {
   BarChart,
   Bar,
@@ -669,15 +670,8 @@ export default function Intervention() {
     return n;
   }
 
-  function reply(t) {
-    t = (t || "").toLowerCase();
-    if (t.includes("stress"))
-      return "Breathing 5 min + Mindfulness 10 min are recommended. Start session?";
-    if (t.includes("family") || t.includes("home"))
-      return "I'm here with you. Want me to play a family-style message and soft music?";
-    if (t.includes("sleep"))
-      return "Target 7-8h sleep. I can dim UI and queue a soundscape.";
-    return "Logged. I can also open Interventions or start an Emotion Scan.";
+  function reply(inputText) {
+    return generateSupportResponse(inputText, "chat");
   }
 
   function sendNow() {
@@ -729,8 +723,47 @@ export default function Intervention() {
   const rows = [mainPrograms.slice(0, 3), mainPrograms.slice(3, 6)];
 
   return (
-    <div className="min-h-screen text-white font-sans select-none">
+    <div className="intervention-theme relative min-h-screen select-none overflow-hidden bg-gradient-to-br from-[#021411] via-[#03211c] to-[#000f0d] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.18),transparent_60%)]" />
+      <div className="pointer-events-none absolute -left-40 top-1/3 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.16),transparent_70%)] blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 top-1/2 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.22),transparent_70%)] blur-3xl" />
       <style>{`
+        .intervention-theme .text-cyan-300,
+        .intervention-theme .text-cyan-400,
+        .intervention-theme .text-slate-300 {
+          color: #bbf7d0 !important;
+        }
+        .intervention-theme .text-slate-400 {
+          color: #c4f1f9 !important;
+        }
+        .intervention-theme .bg-slate-900\\/80,
+        .intervention-theme .bg-slate-900\\/70,
+        .intervention-theme .bg-slate-900\\/60,
+        .intervention-theme .bg-slate-900\\/50 {
+          background-color: rgba(4, 47, 46, 0.55) !important;
+        }
+        .intervention-theme .border-white\\/5 {
+          border-color: rgba(45, 212, 191, 0.25) !important;
+        }
+        .intervention-theme .hover\\:border-white\\/20:hover {
+          border-color: rgba(16, 185, 129, 0.45) !important;
+        }
+        .intervention-theme .border-slate-700,
+        .intervention-theme .border-slate-700\\/50,
+        .intervention-theme .border-slate-600 {
+          border-color: rgba(34, 197, 94, 0.35) !important;
+        }
+        .intervention-theme .hover\\:border-slate-600:hover,
+        .intervention-theme .hover\\:border-purple-500\\/30:hover {
+          border-color: rgba(16, 185, 129, 0.5) !important;
+        }
+        .intervention-theme .bg-gradient-to-r.from-cyan-400.via-blue-400.to-purple-400 {
+          background-image: linear-gradient(90deg, #34d399, #22d3ee, #60a5fa) !important;
+        }
+        .intervention-theme .bg-gradient-to-br.from-slate-900\\/90.to-slate-900\\/60,
+        .intervention-theme .bg-gradient-to-br.from-slate-900\\/70.to-slate-900\\/40 {
+          background-image: linear-gradient(135deg, rgba(9,83,62,0.7), rgba(2,30,25,0.85)) !important;
+        }
         @keyframes icon-float {
           0%, 100% { transform: translateY(0) rotate(0deg) scale(1);}
           25% { transform: translateY(-2px) rotate(2deg) scale(1.05);}
@@ -792,7 +825,7 @@ export default function Intervention() {
         <KPIModal kpiData={selectedKPI} onClose={() => setSelectedKPI(null)} />
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="relative flex w-full flex-col px-6 py-8 lg:px-10">
         {/* Header */}
         <section className="mb-10">
           <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
