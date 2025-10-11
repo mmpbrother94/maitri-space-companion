@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import Starfield from "../utils/Starfield";
+import { useLaunch } from "../components/launch/useLaunch";
 
 // Simple chart component for performance
 const MiniChart = ({ data, type = "line", color = "#38bdf8" }) => {
@@ -88,10 +89,8 @@ const RadialProgress = ({ value, max = 100, color = "#38bdf8", size = 120 }) => 
   );
 };
 
-// Health metric card
 // Health metric card — FIXED to accept real miniData
 const HealthMetricCard = ({ title, value, unit, trend, color = "#38bdf8", miniData }) => {
-  // Fallback to mock data only if miniData is missing
   const chartData = miniData || [...Array(10)].map((_, i) => ({
     value: value + (Math.random() - 0.5) * 10 * (trend > 0 ? 1 : -1)
   }));
@@ -110,19 +109,49 @@ const HealthMetricCard = ({ title, value, unit, trend, color = "#38bdf8", miniDa
           {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
         </div>
       </div>
-      <MiniChart 
-        data={chartData} 
-        color={color} 
-        type="area" 
-      />
+      <MiniChart data={chartData} color={color} type="area" />
     </div>
   );
 };
 
 export default function Index() {
+  const navigate = useNavigate();
+  const { play } = useLaunch();
   const [activeFeature, setActiveFeature] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef(null);
+
+  const handleLaunch = useCallback(
+    (event) => {
+      event.preventDefault();
+      const prefersReduced =
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+      if (prefersReduced) {
+        navigate("/dashboard");
+        return;
+      }
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        navigate("/dashboard");
+      };
+      const fallback = window.setTimeout(finish, 2600);
+      try {
+        play({
+          timeoutMs: 2000,
+          onDone: () => {
+            window.clearTimeout(fallback);
+            finish();
+          },
+        });
+      } catch (error) {
+        window.clearTimeout(fallback);
+        finish();
+      }
+    },
+    [navigate, play],
+  );
 
   useEffect(() => {
     document.title = "MAITRI • Home";
@@ -182,17 +211,18 @@ export default function Index() {
       desc: "AI-powered emotion detection from facial expressions and voice patterns",
       gradient: "from-cyan-500/20 to-blue-500/20",
       details: {
-        description: "Our advanced neural analysis system uses deep learning algorithms to detect subtle emotional states through facial micro-expressions and vocal patterns. This technology enables real-time psychological monitoring without intrusive sensors.",
+        description:
+          "Our advanced neural analysis system uses deep learning algorithms to detect subtle emotional states through facial micro-expressions and vocal patterns. This technology enables real-time psychological monitoring without intrusive sensors.",
         keyPoints: [
           "Real-time emotion detection with 99.2% accuracy",
           "Non-invasive monitoring through existing camera systems",
           "Adaptive learning based on individual astronaut profiles",
-          "Privacy-preserving data processing on-device"
+          "Privacy-preserving data processing on-device",
         ],
         stats: [
           { value: "99.2%", label: "Detection Accuracy" },
           { value: "<100ms", label: "Processing Time" },
-          { value: "24/7", label: "Continuous Monitoring" }
+          { value: "24/7", label: "Continuous Monitoring" },
         ],
         visualization: "radial",
         radialData: { value: 99.2 },
@@ -201,9 +231,9 @@ export default function Index() {
           { label: "Calm", value: 99.1 },
           { label: "Stressed", value: 97.8 },
           { label: "Fatigued", value: 96.5 },
-          { label: "Anxious", value: 95.2 }
-        ]
-      }
+          { label: "Anxious", value: 95.2 },
+        ],
+      },
     },
     {
       icon: "💙",
@@ -211,26 +241,27 @@ export default function Index() {
       desc: "Personalized psychological interventions based on crew member needs",
       gradient: "from-blue-500/20 to-indigo-500/20",
       details: {
-        description: "MAITRI provides personalized psychological support through adaptive interventions tailored to each astronaut's emotional state, personality profile, and mission phase. Our system dynamically adjusts its approach based on real-time feedback.",
+        description:
+          "MAITRI provides personalized psychological support through adaptive interventions tailored to each astronaut's emotional state, personality profile, and mission phase. Our system dynamically adjusts its approach based on real-time feedback.",
         keyPoints: [
           "Personalized intervention strategies for each crew member",
           "Context-aware support based on mission phase and workload",
           "Evidence-based therapeutic techniques adapted for space",
-          "Progress tracking and adaptive adjustment of care plans"
+          "Progress tracking and adaptive adjustment of care plans",
         ],
         stats: [
           { value: "94%", label: "User Satisfaction" },
           { value: "37%", label: "Stress Reduction" },
-          { value: "24/7", label: "Support Availability" }
+          { value: "24/7", label: "Support Availability" },
         ],
         visualization: "intervention",
         interventionData: [
           { type: "Mindfulness", usage: 42, effectiveness: 92 },
           { type: "Cognitive", usage: 28, effectiveness: 88 },
           { type: "Social", usage: 18, effectiveness: 95 },
-          { type: "Physical", usage: 12, effectiveness: 85 }
-        ]
-      }
+          { type: "Physical", usage: 12, effectiveness: 85 },
+        ],
+      },
     },
     {
       icon: "📈",
@@ -238,17 +269,18 @@ export default function Index() {
       desc: "Continuous tracking of physical and mental health indicators",
       gradient: "from-sky-500/20 to-cyan-500/20",
       details: {
-        description: "Our comprehensive monitoring system tracks both physiological and psychological indicators to provide a holistic view of astronaut well-being. Data is analyzed in real-time to detect early signs of stress, fatigue, or health issues.",
+        description:
+          "Our comprehensive monitoring system tracks both physiological and psychological indicators to provide a holistic view of astronaut well-being. Data is analyzed in real-time to detect early signs of stress, fatigue, or health issues.",
         keyPoints: [
           "Multi-parameter health tracking (HRV, sleep quality, cognitive performance)",
           "Early warning system for potential health issues",
           "Seamless integration with existing spacecraft systems",
-          "Automated reporting to ground control when necessary"
+          "Automated reporting to ground control when necessary",
         ],
         stats: [
           { value: "12", label: "Health Metrics" },
           { value: "99.8%", label: "Data Reliability" },
-          { value: "24/7", label: "Monitoring" }
+          { value: "24/7", label: "Monitoring" },
         ],
         visualization: "vitals",
         vitalsData: [
@@ -256,9 +288,9 @@ export default function Index() {
           { name: "HRV", value: 68, unit: "ms", trend: 5, color: "#0ea5e9" },
           { name: "Sleep Quality", value: 85, unit: "%", trend: 3, color: "#3b82f6" },
           { name: "Cognitive Score", value: 92, unit: "%", trend: 1, color: "#8b5cf6" },
-          { name: "Stress Level", value: 18, unit: "%", trend: -4, color: "#ec4899" }
-        ]
-      }
+          { name: "Stress Level", value: 18, unit: "%", trend: -4, color: "#ec4899" },
+        ],
+      },
     },
     {
       icon: "🛡️",
@@ -266,24 +298,25 @@ export default function Index() {
       desc: "Automatic alerts to ground control for critical situations",
       gradient: "from-indigo-500/20 to-purple-500/20",
       details: {
-        description: "MAITRI serves as the first line of defense for astronaut safety by automatically detecting critical situations and alerting ground control. Our system prioritizes alerts based on severity and provides contextual information for rapid response.",
+        description:
+          "MAITRI serves as the first line of defense for astronaut safety by automatically detecting critical situations and alerting ground control. Our system prioritizes alerts based on severity and provides contextual information for rapid response.",
         keyPoints: [
           "Real-time anomaly detection for psychological and physical health",
           "Automated emergency protocols activation",
           "Secure communication channels with ground control",
-          "Fail-safe mechanisms for system reliability"
+          "Fail-safe mechanisms for system reliability",
         ],
         stats: [
           { value: "<5s", label: "Alert Response" },
           { value: "100%", label: "System Uptime" },
-          { value: "24/7", label: "Monitoring" }
+          { value: "24/7", label: "Monitoring" },
         ],
         visualization: "safety",
         safetyData: {
           alerts: [
             { type: "Psychological", count: 12, severity: "Medium" },
             { type: "Physiological", count: 8, severity: "High" },
-            { type: "Environmental", count: 3, severity: "Critical" }
+            { type: "Environmental", count: 3, severity: "Critical" },
           ],
           timeline: [
             { day: "Day 1", alerts: 2 },
@@ -292,11 +325,11 @@ export default function Index() {
             { day: "Day 4", alerts: 0 },
             { day: "Day 5", alerts: 2 },
             { day: "Day 6", alerts: 1 },
-            { day: "Day 7", alerts: 4 }
-          ]
-        }
-      }
-    }
+            { day: "Day 7", alerts: 4 },
+          ],
+        },
+      },
+    },
   ];
 
   return (
@@ -605,7 +638,7 @@ export default function Index() {
           border-radius: 4px;
           margin: 8px 0;
           position: relative;
-          overflow: hidden;
+          overflow: hidden.
         }
         .bar-fill {
           height: 100%;
@@ -726,13 +759,15 @@ export default function Index() {
           </div>
         </div>
 
-        <NavLink to={'/dashboard'}
-          onClick={createRipple}
+        <NavLink
+          to={"/dashboard"}
+          onClick={(event) => {
+            createRipple(event);
+            handleLaunch(event);
+          }}
           className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-500 text-white rounded-full px-6 py-3 font-semibold shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2 group"
         >
-          <span  style={{ filter: "drop-shadow(0 0 8px rgba(56,189,248,0.6))" }}>
-            🚀
-          </span>
+          <span style={{ filter: "drop-shadow(0 0 8px rgba(56,189,248,0.6))" }}>🚀</span>
           <span className="relative z-10">Launch Mission Control</span>
           <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
         </NavLink>
@@ -747,7 +782,10 @@ export default function Index() {
           <div className="h-1 w-32 mx-auto bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-500 rounded-full"></div>
         </div>
         
-        <p className="animate-slide-up max-w-2xl mx-auto text-sky-200 text-xl leading-relaxed" style={{animationDelay: '0.2s', opacity: 0}}>
+        <p
+          className="animate-slide-up max-w-2xl mx-auto text-sky-200 text-xl leading-relaxed"
+          style={{ animationDelay: "0.2s", opacity: 0 }}
+        >
           Advanced multimodal AI system monitoring psychological and physical
           well-being aboard <strong className="text-cyan-400">Bhartiya Antariksh Station</strong>.
           Real-time emotion detection, adaptive interventions, and 24/7 mission support.
@@ -766,7 +804,7 @@ export default function Index() {
           </NavLink>
           
           <NavLink
-          to={'/dashboard/interventions'}
+            to={"/dashboard/interventions"}
             onClick={createRipple}
             className="glow-border group glass-card text-sky-400 rounded-full px-8 py-4 font-semibold hover:bg-slate-800/50 transition-all duration-300 hover:scale-105 flex items-center gap-3"
           >
@@ -800,21 +838,9 @@ export default function Index() {
       {/* KPI Tiles */}
       <section className="relative z-10 px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
         {[
-          {
-            icon: "🧠",
-            val: "99.2%",
-            label: "Emotion Detection Accuracy"
-          },
-          {
-            icon: "🛰️",
-            val: "24/7",
-            label: "Continuous Monitoring"
-          },
-          {
-            icon: "⚡",
-            val: "<100ms",
-            label: "Response Time"
-          },
+          { icon: "🧠", val: "99.2%", label: "Emotion Detection Accuracy" },
+          { icon: "🛰️", val: "24/7", label: "Continuous Monitoring" },
+          { icon: "⚡", val: "<100ms", label: "Response Time" },
         ].map(({ icon, val, label }, i) => (
           <article
             key={i}
@@ -823,9 +849,11 @@ export default function Index() {
             <div className={`absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
             <div className="shimmer-bg absolute inset-0 opacity-0 group-hover:opacity-100"></div>
             <div className="relative z-10 flex items-center gap-6 w-full">
-              <div className={`text-6xl animate-float bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 p-4 rounded-2xl`} style={{animationDelay: `${i * 0.5}s`}}>{icon}</div>
+              <div className="text-6xl animate-float bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 p-4 rounded-2xl" style={{ animationDelay: `${i * 0.5}s` }}>
+                {icon}
+              </div>
               <div>
-                <div className={`text-5xl font-extrabold leading-tight gradient-text`}>{val}</div>
+                <div className="text-5xl font-extrabold leading-tight gradient-text">{val}</div>
                 <div className="text-sky-300 font-medium mt-1">{label}</div>
               </div>
             </div>
@@ -915,7 +943,8 @@ export default function Index() {
                 </span>
               ))}
             </div>
-            <NavLink to={'/dashboard'}
+            <NavLink
+              to={"/dashboard"}
               onClick={createRipple}
               className="relative overflow-hidden group inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-500 text-white rounded-full px-10 py-5 text-lg font-bold shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105"
             >
@@ -989,21 +1018,14 @@ export default function Index() {
                   <>
                     <h3 className="chart-title">Emotion Detection Accuracy</h3>
                     <div className="radial-container">
-                      <RadialProgress 
-                        value={activeFeature.details.radialData.value} 
-                        color="#38bdf8" 
-                        size={180} 
-                      />
+                      <RadialProgress value={activeFeature.details.radialData.value} color="#38bdf8" size={180} />
                     </div>
                     <div className="emotion-bars">
                       {activeFeature.details.chartData.map((item, idx) => (
                         <div className="emotion-bar" key={idx}>
                           <div className="text-sky-300 text-sm">{item.label}</div>
                           <div className="bar-value">
-                            <div 
-                              className="bar-fill" 
-                              style={{ '--width': `${item.value}%` }}
-                            ></div>
+                            <div className="bar-fill" style={{ "--width": `${item.value}%` }}></div>
                           </div>
                           <div className="text-cyan-400 font-bold">{item.value}%</div>
                         </div>
@@ -1021,10 +1043,7 @@ export default function Index() {
                           <div className="text-sky-300 font-medium">{item.type}</div>
                           <div className="text-cyan-400 text-2xl font-bold mt-2">{item.effectiveness}%</div>
                           <div className="intervention-usage">
-                            <div 
-                              className="intervention-fill" 
-                              style={{ width: `${item.usage}%` }}
-                            ></div>
+                            <div className="intervention-fill" style={{ width: `${item.usage}%` }}></div>
                           </div>
                           <div className="text-slate-400 text-sm">{item.usage}% usage</div>
                         </div>
@@ -1038,7 +1057,7 @@ export default function Index() {
                     <h3 className="chart-title">Real-time Health Metrics</h3>
                     <div className="vitals-grid">
                       {activeFeature.details.vitalsData.map((metric, idx) => (
-                        <HealthMetricCard 
+                        <HealthMetricCard
                           key={idx}
                           title={metric.name}
                           value={metric.value}
@@ -1077,10 +1096,7 @@ export default function Index() {
                           <div className="timeline-bars">
                             {activeFeature.details.safetyData.timeline.map((day, idx) => (
                               <div key={idx} className="flex flex-col items-center">
-                                <div 
-                                  className="timeline-bar" 
-                                  style={{ height: `${(day.alerts / 5) * 100}%` }}
-                                ></div>
+                                <div className="timeline-bar" style={{ height: `${(day.alerts / 5) * 100}%` }}></div>
                                 <div className="timeline-label">{day.day}</div>
                               </div>
                             ))}

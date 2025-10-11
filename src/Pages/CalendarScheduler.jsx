@@ -141,8 +141,51 @@ export default function CalendarScheduler() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-8 text-white">
-      <div className="max-w-6xl mx-auto">
+    <div className="scheduler-theme relative min-h-screen overflow-hidden bg-gradient-to-br from-[#1b0a2f] via-[#2c0f3a] to-[#0a051a] px-6 py-10 text-white lg:px-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.18),transparent_60%)]" />
+      <div className="pointer-events-none absolute -left-32 top-1/2 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.15),transparent_70%)] blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 top-1/3 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.18),transparent_70%)] blur-3xl" />
+      <style>{`
+        .scheduler-theme .bg-slate-700,
+        .scheduler-theme .border-slate-700,
+        .scheduler-theme .border-slate-600,
+        .scheduler-theme .border-slate-500 {
+          border-color: rgba(251, 146, 60, 0.35) !important;
+          background-color: rgba(60, 16, 83, 0.55) !important;
+        }
+        .scheduler-theme .hover\\:bg-slate-600:hover {
+          background-color: rgba(249, 115, 22, 0.45) !important;
+        }
+        .scheduler-theme .bg-slate-800\\/50 {
+          background-color: rgba(36, 7, 64, 0.65) !important;
+        }
+        .scheduler-theme .text-slate-300,
+        .scheduler-theme .text-slate-400 {
+          color: #f9d6ff !important;
+        }
+        .scheduler-theme .text-sky-400 {
+          color: #fb923c !important;
+        }
+        .scheduler-theme .bg-blue-500,
+        .scheduler-theme .bg-blue-500\\/30 {
+          background-color: rgba(59, 130, 246, 0.65) !important;
+        }
+        .scheduler-theme .ring-blue-400 {
+          --tw-ring-color: rgba(249, 115, 22, 0.5) !important;
+        }
+        .scheduler-theme .bg-blue-800 {
+          background-color: rgba(99, 102, 241, 0.6) !important;
+        }
+        .scheduler-theme .hover\\:bg-blue-900:hover {
+          background-color: rgba(76, 29, 149, 0.75) !important;
+        }
+        .scheduler-theme .bg-gradient-to-r.from-sky-400.to-blue-500 {
+          background-image: linear-gradient(90deg, #f97316, #ec4899) !important;
+        }
+      `}</style>
+
+      {/* content container */}
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -193,9 +236,7 @@ export default function CalendarScheduler() {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {renderCalendar()}
-            </div>
+            <div className="grid grid-cols-7 gap-2 mb-4">{renderCalendar()}</div>
 
             <div className="flex items-center gap-4 text-sm text-slate-400 mt-4 pt-4 border-t border-slate-700">
               <div className="flex items-center gap-2">
