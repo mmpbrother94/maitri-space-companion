@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   useCallback,
   useEffect,
   useMemo,
@@ -1425,15 +1425,3 @@ export default function Emotion() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-

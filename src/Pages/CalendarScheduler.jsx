@@ -183,7 +183,9 @@ export default function CalendarScheduler() {
           background-image: linear-gradient(90deg, #f97316, #ec4899) !important;
         }
       `}</style>
-      <div className="relative z-10">
+
+      {/* content container */}
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -234,9 +236,7 @@ export default function CalendarScheduler() {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {renderCalendar()}
-            </div>
+            <div className="grid grid-cols-7 gap-2 mb-4">{renderCalendar()}</div>
 
             <div className="flex items-center gap-4 text-sm text-slate-400 mt-4 pt-4 border-t border-slate-700">
               <div className="flex items-center gap-2">

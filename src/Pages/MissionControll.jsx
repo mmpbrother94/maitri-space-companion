@@ -94,20 +94,15 @@ function MissionClock() {
     window.scrollTo(0, 0);
   }, []);
   return (
-    <div className="relative flex w-full max-w-xs flex-col gap-2 overflow-hidden rounded-3xl border border-cyan-500/40 bg-gradient-to-br from-[#04142f] via-[#081c40] to-[#031126] px-6 py-5 shadow-[0_0_24px_rgba(34,211,238,0.2)]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.25),transparent_65%)] opacity-80" />
-      <div className="pointer-events-none absolute -right-10 top-1/3 h-24 w-24 rotate-12 rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.18),transparent_70%)] blur-xl" />
-      <div className="relative flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.25)]">
-          <Clock className="h-6 w-6" />
-        </div>
-        <div className="text-2xl font-bold tracking-wider text-cyan-100">
+    <div className="flex items-center bg-black px-4 py-2 rounded-xl border-4 border-blue-400 shadow flex-col w-[16rem]">
+      <div className=" flex items-center gap-2">
+        <Clock className="w-7 h-7" />
+        <span className="font-bold text-2xl text-cyan-500">
           {time.toLocaleTimeString()}
-        </div>
+        </span>
       </div>
-      <div className="relative text-sm font-semibold text-cyan-300">
-        Mission Day 127{" \u2022 "}Orbit 2,048
-      </div>
+
+      <div className="text-cyan-600">Mission Day 127 : orbit 2,048</div>
     </div>
   );
 }
@@ -415,44 +410,6 @@ export default function MissionControl() {
     },
   ];
   
-  const statStyleMap = {
-    cyan: {
-      glow: "from-cyan-500/35 via-cyan-400/10 to-transparent",
-      icon: "bg-cyan-500/15 text-cyan-200",
-      chip: "border-cyan-400/40 bg-cyan-500/10 text-cyan-200",
-    },
-    blue: {
-      glow: "from-sky-500/35 via-sky-400/10 to-transparent",
-      icon: "bg-sky-500/15 text-sky-200",
-      chip: "border-sky-400/40 bg-sky-500/10 text-sky-200",
-    },
-    emerald: {
-      glow: "from-emerald-500/40 via-emerald-400/10 to-transparent",
-      icon: "bg-emerald-500/15 text-emerald-200",
-      chip: "border-emerald-400/40 bg-emerald-500/10 text-emerald-200",
-    },
-    orange: {
-      glow: "from-orange-500/35 via-orange-400/10 to-transparent",
-      icon: "bg-orange-500/15 text-orange-200",
-      chip: "border-orange-400/40 bg-orange-500/10 text-orange-200",
-    },
-  };
-  
-  const crewStatusStyles = {
-    STABLE: {
-      chip: "border-cyan-400/40 bg-cyan-500/10 text-cyan-200",
-      icon: "bg-cyan-500/15 text-cyan-200",
-    },
-    GOOD: {
-      chip: "border-emerald-400/40 bg-emerald-500/10 text-emerald-200",
-      icon: "bg-emerald-500/15 text-emerald-200",
-    },
-    ATTENTION: {
-      chip: "border-orange-400/40 bg-orange-500/10 text-orange-200",
-      icon: "bg-orange-500/15 text-orange-200",
-    },
-  };
-  
   // Define unique data for each crew member
   const crew = [
     {
@@ -696,10 +653,7 @@ export default function MissionControl() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#030b24] via-[#041134] to-[#040916] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_60%)]" />
-      <div className="pointer-events-none absolute bottom-[-26rem] left-1/2 h-[48rem] w-[48rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.12),transparent_70%)]" />
-      <div className="relative flex w-full flex-col px-6 py-10 font-sans lg:px-10 lg:py-14">
+    <div className="min-h-screen p-8 text-white font-sans">
       {/* Icon floating keyframes only */}
       <style>
         {`
@@ -722,46 +676,47 @@ export default function MissionControl() {
           onClose={() => setSelectedCrew(null)} 
         />
       )}
-
+      
       {/* Header */}
-      <header className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <header className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white lg:text-5xl">
-            <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
-              Mission Control
-            </span>
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+            Mission Control
           </h1>
-          <p className="mt-2 text-sm text-slate-300 lg:text-base">
-            Real-time crew monitoring{" \u2022 "}Bhartiya Antariksh Station
+          <p className="text-slate-400 text-sm mt-1">
+            Real-time crew monitoring • Bhartiya Antariksh Station
           </p>
         </div>
         <MissionClock />
       </header>
 
       {/* Stats */}
-      <section className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map(({ icon: StatIcon, value, label, change, color }, index) => {
-          const accent = statStyleMap[color] ?? statStyleMap.cyan;
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        {stats.map(({ icon: StatIcon, value, label, change, color }, i) => {
+          const colorClasses = {
+            cyan: "from-cyan-600 to-cyan-500 bg-gradient-to-br",
+            blue: "from-blue-600 to-blue-500 bg-gradient-to-br",
+            emerald: "from-emerald-600 to-emerald-500 bg-gradient-to-br",
+            orange: "from-orange-600 to-orange-500 bg-gradient-to-br",
+          };
           return (
             <div
               key={label}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-[0_22px_45px_rgba(8,20,58,0.4)] backdrop-blur transition-transform duration-500 hover:-translate-y-1"
+              className={`relative rounded-lg p-6 bg-gradient-to-br from-neutral-900/70 to-neutral-900/30 shadow-lg backdrop-blur-lg border border-slate-700 group hover:scale-105 transition duration-700 cursor-pointer overflow-hidden`}
             >
               <div
-                className={`pointer-events-none absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100 bg-gradient-to-br ${accent.glow}`}
+                className={`absolute inset-0 rounded-lg blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${colorClasses[color]}`}
+                aria-hidden="true"
               />
-              <div className="pointer-events-none absolute -right-10 top-[-40%] h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_65%)] blur-2xl" />
-              <div className="relative flex flex-col gap-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${accent.icon} shadow-[0_0_18px_rgba(59,130,246,0.25)]`}>
-                  <StatIcon className={`h-6 w-6 icon-float icon-delay-${index}`} />
-                </div>
-                <div className="text-4xl font-black tracking-tight text-white">
-                  {value}
-                </div>
-                <p className="text-sm font-medium text-slate-300">{label}</p>
-                <span className={`inline-flex w-fit items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] ${accent.chip}`}>
-                  {change}
-                </span>
+              <div className="flex justify-center mb-3">
+                <StatIcon className={`w-10 h-10 icon-float icon-delay-${i}`} />
+              </div>
+              <div className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-white to-slate-300">
+                {value}
+              </div>
+              <div className="text-slate-400">{label}</div>
+              <div className={`text-sm font-semibold mt-1 text-${color}-400`}>
+                {change}
               </div>
             </div>
           );
@@ -769,61 +724,78 @@ export default function MissionControl() {
       </section>
 
       {/* Crew */}
-      <section className="mb-12 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {crew.map((member) => {
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        {crew.map((member, i) => {
           const CrewIcon = getIconForCrew(member.name);
-          const statusStyles = crewStatusStyles[member.status] ?? crewStatusStyles.STABLE;
           return (
             <div
               key={member.name}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-[0_32px_68px_rgba(8,20,58,0.45)] backdrop-blur transition-transform duration-500 hover:-translate-y-1"
+              className="relative rounded-xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 p-6 border border-slate-700 shadow-lg backdrop-blur-md cursor-default hover:scale-105 transition duration-500 overflow-hidden"
             >
               <div
                 aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100 bg-gradient-to-tr ${member.progressColor}`}
-                style={{ filter: "blur(28px)" }}
+                className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 bg-gradient-to-tr ${member.progressColor}`}
+                style={{ filter: "blur(25px)" }}
               />
-              <div className="relative z-10 flex flex-col gap-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${statusStyles.icon} shadow-[0_0_24px_rgba(59,130,246,0.2)]`}>
-                      <CrewIcon className="h-6 w-6" />
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-5">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`${member.statusColor} p-2 rounded-lg shadow-lg bg-opacity-40 flex items-center justify-center`}
+                    >
+                      <CrewIcon
+                        className={`w-7 h-7  icon-delay-${i}`}
+                      />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{member.name}</h3>
-                      <p className="text-sm text-slate-400">{member.status}</p>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                        {member.name}
+                      </h3>
+                      <div className="text-sm text-slate-400">
+                        {member.status}
+                      </div>
                     </div>
                   </div>
-                  <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] ${statusStyles.chip}`}>
+                  <span
+                    className={`${member.statusColor} text-xs font-semibold px-3 py-1 rounded-full text-white shadow-md`}
+                  >
                     {member.status}
                   </span>
                 </div>
-                <div>
-                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-400">
+                {/* Progress Bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-slate-400 mb-1 font-semibold">
                     <span>Well-being Score</span>
                     <span>{member.progress}%</span>
                   </div>
-                  <div className="h-2.5 w-full rounded-full border border-white/10 bg-slate-800/60">
+                  <div className="w-full rounded-full h-2.5 overflow-hidden bg-slate-900 border border-slate-700 shadow-inner">
                     <div
-                      className={`h-full rounded-full bg-gradient-to-r ${member.progressColor} shadow-[0_0_20px_rgba(59,130,246,0.3)]`}
+                      className={`h-2.5 rounded-full bg-gradient-to-r ${member.progressColor} relative transition-all duration-1000 ease-out`}
                       style={{ width: `${member.progress}%` }}
-                    />
+                    >
+                      <div
+                        className="absolute inset-0 rounded-full bg-white/30 animate-pulse"
+                        style={{ animationDuration: "3s" }}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   {member.stats.map(({ label, value }) => (
                     <div
                       key={label}
-                      className="rounded-2xl border border-white/10 bg-slate-900/60 px-3 py-3 text-center shadow-[0_10px_24px_rgba(8,20,58,0.35)]"
+                      className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-md p-3 text-center border border-slate-700/50 hover:border-sky-600/50 transition-colors duration-300"
                     >
-                      <p className="text-xs text-slate-400">{label}</p>
-                      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+                      <div className="text-xs text-slate-400">{label}</div>
+                      <div className="text-sm font-semibold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                        {value}
+                      </div>
                     </div>
                   ))}
                 </div>
                 <button
                   onClick={() => handleViewDetails(member)}
-                  className="inline-flex w-full items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-200 transition duration-300 hover:bg-cyan-500/20"
+                  className="mt-5 w-full text-cyan-400 text-sm py-2.5 font-semibold rounded-lg border border-cyan-500/30 hover:bg-cyan-500/10 transition duration-300 shadow-sm cursor-pointer"
                   type="button"
                 >
                   View Detailed Analysis
@@ -835,76 +807,68 @@ export default function MissionControl() {
       </section>
 
       {/* Recent Activity & Alerts */}
-      <section className="mb-12 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-[0_28px_60px_rgba(8,20,58,0.4)] backdrop-blur transition-transform duration-500 hover:-translate-y-1">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-800/50 via-slate-900/0 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
-          <div className="relative z-10">
-            <h2 className="mb-5 flex items-center gap-3 text-lg font-semibold text-white">
-              <CheckCircle className="h-6 w-6 text-emerald-400" />
-              Recent Activity
-            </h2>
-            <ul className="space-y-4 text-sm text-slate-300">
-              {activities.map(({ text, time }, activityIndex) => (
-                <li key={activityIndex} className="flex items-start gap-3">
-                  <span className="mt-1 flex h-2.5 w-2.5 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-cyan-400 to-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.5)]" />
-                  <div>
-                    <p className="leading-5">{text}</p>
-                    <p className="mt-1 text-xs text-slate-400">{time}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div className="rounded-lg p-6 bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-slate-700 shadow-lg backdrop-blur-md group hover:scale-105 transition duration-300">
+          <h2 className="text-lg font-semibold mb-5 flex items-center gap-2 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+            <CheckCircle className="w-6 h-6 icon-float icon-delay-0 text-emerald-400" />{" "}
+            Recent Activity
+          </h2>
+          <ul className="space-y-4">
+            {activities.map(({ text, time }, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
+                <span
+                  className="block w-3 h-3 rounded-full mt-2 bg-gradient-to-r from-cyan-400 to-sky-400 shadow-lg shadow-cyan-400/50 animate-pulse"
+                  style={{ animationDelay: `${0.3 * i}s` }}
+                />
+                <div>
+                  <p className="leading-5">{text}</p>
+                  <p className="text-xs text-slate-400 mt-1">{time}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="group relative overflow-hidden rounded-3xl border border-orange-500/30 bg-gradient-to-br from-orange-900/80 via-orange-800/60 to-orange-700/60 p-6 shadow-[0_34px_70px_rgba(124,45,18,0.45)] backdrop-blur transition-transform duration-500 hover:-translate-y-1">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange-500/30 via-transparent to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
-          <div className="relative z-10">
-            <h2 className="mb-5 flex items-center gap-3 text-lg font-semibold text-white">
-              <AlertTriangle className="h-6 w-6 text-orange-300" />
-              Active Alerts
-            </h2>
-            <ul className="space-y-4">
-              {alerts.map(({ text, severity }, alertIndex) => (
-                <li
-                  key={alertIndex}
-                  className="rounded-2xl border border-orange-400/40 bg-orange-500/10 px-4 py-4 text-orange-100 shadow-[0_18px_32px_rgba(124,45,18,0.4)]"
-                >
-                  <p className="font-semibold leading-5">{text}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.35em] text-orange-200">
-                    {severity}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div className="rounded-lg p-6 bg-gradient-to-br from-orange-900/90 to-orange-800/70 border border-orange-700 shadow-lg backdrop-blur-md group hover:scale-105 transition duration-300 relative overflow-hidden">
+          <h2 className="text-lg font-semibold mb-5 flex items-center gap-2 bg-gradient-to-r from-white to-orange-300 bg-clip-text text-transparent">
+            <AlertTriangle className="w-6 h-6 icon-float icon-delay-1 text-orange-400" />{" "}
+            Active Alerts
+          </h2>
+          <ul className="space-y-5 relative z-10">
+            {alerts.map(({ text, severity }, i) => (
+              <li
+                key={i}
+                className="bg-gradient-to-br from-orange-600/30 via-orange-600/15 to-orange-900/10 border border-orange-600/40 rounded-lg p-4 shadow-lg shadow-orange-600/20"
+              >
+                <p className="text-orange-100 font-semibold">{text}</p>
+                <p className="text-orange-300 text-xs mt-1">{severity}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-orange-400 to-transparent rounded-full blur-3xl opacity-40 pointer-events-none" />
         </div>
       </section>
 
       {/* Action Buttons */}
-      <section className="grid grid-cols-1 gap-4 pb-8 md:grid-cols-3">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <NavLink
-          to="/dashboard/emotions"
-          className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 px-6 py-4 text-center text-sm font-semibold text-white shadow-[0_20px_45px_rgba(8,20,58,0.4)] transition-transform duration-500 hover:-translate-y-1"
+          to={"/dashboard/emotions"}
+          className="relative overflow-hidden bg-slate-800 hover:bg-slate-700 text-white font-semibold py-4 border border-slate-600  rounded-lg shadow-lg hover:scale-105 group flex justify-center"
         >
           <span className="relative z-10">Start Emotion Scan</span>
-          <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-blue-500/10 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
         </NavLink>
         <NavLink
-          to="/dashboard/interventions"
-          className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 px-6 py-4 text-center text-sm font-semibold text-white shadow-[0_20px_45px_rgba(8,20,58,0.4)] transition-transform duration-500 hover:-translate-y-1"
+          to={"/dashboard/interventions"}
+          className="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-4 rounded-lg shadow-md border border-slate-600 transition-colors duration-300 hover:scale-105 flex justify-center"
         >
-          <span className="relative z-10">View Interventions</span>
-          <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
+          View Interventions
         </NavLink>
         <NavLink
-          to="/dashboard/reports"
-          className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 px-6 py-4 text-center text-sm font-semibold text-white shadow-[0_20px_45px_rgba(8,20,58,0.4)] transition-transform duration-500 hover:-translate-y-1"
+          to={"/dashboard/reports"}
+          className="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-4 rounded-lg shadow-md border border-slate-600 transition-colors duration-300 hover:scale-105 flex justify-center"
         >
-          <span className="relative z-10">Generate Report</span>
-          <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/10 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
+          Generate Report
         </NavLink>
       </section>
     </div>
-  </div>
   );
 }

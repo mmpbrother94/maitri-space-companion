@@ -9,8 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 
 // Main page programs
@@ -95,77 +93,17 @@ const mainPrograms = [
   },
 ];
 
-// Different programs for the modal details
+// Modal-only programs
 const detailedPrograms = [
-  {
-    icon: "🌌",
-    title: "Cosmic Visualization",
-    desc: "Space-themed guided imagery for deep relaxation and cosmic connection",
-    tag: "Deep Relaxation",
-    tagColor: "text-purple-300",
-    barColor: "from-purple-400 via-indigo-400 to-blue-500",
-    percent: 96,
-    time: "12 min",
-    iconBg: "from-purple-500 to-blue-600",
-  },
-  {
-    icon: "🧘",
-    title: "Zero-G Yoga",
-    desc: "Adapted yoga poses for microgravity environments to maintain flexibility",
-    tag: "Physical Health",
-    tagColor: "text-green-300",
-    barColor: "from-green-400 via-emerald-400 to-teal-500",
-    percent: 89,
-    time: "20 min",
-    iconBg: "from-green-500 to-teal-600",
-  },
-  {
-    icon: "🎵",
-    title: "Therapeutic Sound Bath",
-    desc: "Healing frequencies and space ambient sounds for mental restoration",
-    tag: "Sensory Therapy",
-    tagColor: "text-blue-300",
-    barColor: "from-blue-400 via-cyan-400 to-teal-500",
-    percent: 93,
-    time: "18 min",
-    iconBg: "from-blue-500 to-teal-600",
-  },
-  {
-    icon: "📚",
-    title: "Astronaut Journaling",
-    desc: "Structured reflective writing to process experiences and emotions",
-    tag: "Emotional Processing",
-    tagColor: "text-amber-300",
-    barColor: "from-amber-400 via-orange-400 to-red-500",
-    percent: 87,
-    time: "10 min",
-    iconBg: "from-amber-500 to-red-600",
-  },
-  {
-    icon: "🤝",
-    title: "Crew Bonding Exercises",
-    desc: "Interactive activities to strengthen team cohesion and communication",
-    tag: "Team Building",
-    tagColor: "text-pink-300",
-    barColor: "from-pink-400 via-rose-400 to-fuchsia-500",
-    percent: 91,
-    time: "25 min",
-    iconBg: "from-pink-500 to-fuchsia-600",
-  },
-  {
-    icon: "🎯",
-    title: "Mission Focus Training",
-    desc: "Concentration exercises to enhance task performance and attention",
-    tag: "Cognitive Enhancement",
-    tagColor: "text-indigo-300",
-    barColor: "from-indigo-400 via-purple-400 to-violet-500",
-    percent: 95,
-    time: "15 min",
-    iconBg: "from-indigo-500 to-violet-600",
-  },
+  { icon: "🌌", title: "Cosmic Visualization", desc: "Space-themed guided imagery for deep relaxation and cosmic connection", tag: "Deep Relaxation", tagColor: "text-purple-300", barColor: "from-purple-400 via-indigo-400 to-blue-500", percent: 96, time: "12 min", iconBg: "from-purple-500 to-blue-600" },
+  { icon: "🧘", title: "Zero-G Yoga", desc: "Adapted yoga poses for microgravity environments to maintain flexibility", tag: "Physical Health", tagColor: "text-green-300", barColor: "from-green-400 via-emerald-400 to-teal-500", percent: 89, time: "20 min", iconBg: "from-green-500 to-teal-600" },
+  { icon: "🎵", title: "Therapeutic Sound Bath", desc: "Healing frequencies and space ambient sounds for mental restoration", tag: "Sensory Therapy", tagColor: "text-blue-300", barColor: "from-blue-400 via-cyan-400 to-teal-500", percent: 93, time: "18 min", iconBg: "from-blue-500 to-teal-600" },
+  { icon: "📚", title: "Astronaut Journaling", desc: "Structured reflective writing to process experiences and emotions", tag: "Emotional Processing", tagColor: "text-amber-300", barColor: "from-amber-400 via-orange-400 to-red-500", percent: 87, time: "10 min", iconBg: "from-amber-500 to-red-600" },
+  { icon: "🤝", title: "Crew Bonding Exercises", desc: "Interactive activities to strengthen team cohesion and communication", tag: "Team Building", tagColor: "text-pink-300", barColor: "from-pink-400 via-rose-400 to-fuchsia-500", percent: 91, time: "25 min", iconBg: "from-pink-500 to-fuchsia-600" },
+  { icon: "🎯", title: "Mission Focus Training", desc: "Concentration exercises to enhance task performance and attention", tag: "Cognitive Enhancement", tagColor: "text-indigo-300", barColor: "from-indigo-400 via-purple-400 to-violet-500", percent: 95, time: "15 min", iconBg: "from-indigo-500 to-violet-600" },
 ];
 
-// Generate 24 session records using main programs
+// Generate 24 session records
 const generateSessionData = () => {
   const sessions = [];
   const programNames = mainPrograms.map((p) => p.title);
@@ -175,8 +113,7 @@ const generateSessionData = () => {
     const date = new Date(baseDate);
     date.setDate(date.getDate() - i);
     const formattedDate = date.toISOString().split("T")[0];
-    const randomProgram =
-      programNames[Math.floor(Math.random() * programNames.length)];
+    const randomProgram = programNames[Math.floor(Math.random() * programNames.length)];
     const program = mainPrograms.find((p) => p.title === randomProgram);
 
     sessions.push({
@@ -192,7 +129,7 @@ const generateSessionData = () => {
   return sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
 };
 
-// Effectiveness chart data using main programs
+// Effectiveness chart data
 const effectivenessData = [
   { program: "Breathing Exercise", effectiveness: 92 },
   { program: "Mindfulness Meditation", effectiveness: 88 },
@@ -218,15 +155,7 @@ const KPIModal = ({ kpiData, onClose }) => {
     switch (kpiData.label) {
       case "Sessions Completed":
         return (
-          <div
-            className="space-y-6"
-            style={{
-              scrollBehavior: "auto", //
-              willChange: "scroll-position",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehavior: "contain",
-            }}
-          >
+          <div className="space-y-6" style={{ scrollBehavior: "auto", willChange: "scroll-position", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
             {/* Stats Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-pink-600/20 to-rose-600/20 p-4 rounded-xl border border-pink-500/30">
@@ -249,46 +178,22 @@ const KPIModal = ({ kpiData, onClose }) => {
 
             {/* Sessions List */}
             <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700">
-              <h4 className="text-lg font-semibold text-white mb-4">
-                Recent Sessions
-              </h4>
-              <div
-                className="space-y-3 max-h-96 overflow-y-auto"
-                style={{
-                  scrollBehavior: "auto", //
-                  willChange: "scroll-position",
-                  WebkitOverflowScrolling: "touch",
-                  overscrollBehavior: "contain",
-                }}
-              >
+              <h4 className="text-lg font-semibold text-white mb-4">Recent Sessions</h4>
+              <div className="space-y-3 max-h-96 overflow-y-auto" style={{ scrollBehavior: "auto", willChange: "scroll-position", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
                 {sessionData.map((session) => (
-                  <div
-                    key={session.id}
-                    className="bg-slate-900/50 p-4 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-colors"
-                  >
+                  <div key={session.id} className="bg-slate-900/50 p-4 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-colors">
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <div className="font-medium text-white">
-                          {session.program}
-                        </div>
-                        <div className="text-sm text-slate-400">
-                          {session.date}
-                        </div>
+                        <div className="font-medium text-white">{session.program}</div>
+                        <div className="text-sm text-slate-400">{session.date}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-slate-400">
-                          {session.duration}
-                        </div>
-                        <div className="text-sm font-medium text-emerald-400">
-                          {session.effectiveness}
-                        </div>
+                        <div className="text-sm text-slate-400">{session.duration}</div>
+                        <div className="text-sm font-medium text-emerald-400">{session.effectiveness}</div>
                       </div>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full"
-                        style={{ width: `${session.progress}%` }}
-                      ></div>
+                      <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full" style={{ width: `${session.progress}%` }}></div>
                     </div>
                   </div>
                 ))}
@@ -299,31 +204,17 @@ const KPIModal = ({ kpiData, onClose }) => {
 
       case "Avg Effectiveness":
         return (
-          <div
-            className="space-y-6"
-            style={{
-              scrollBehavior: "auto", //
-              willChange: "scroll-position",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehavior: "contain",
-            }}
-          >
+          <div className="space-y-6" style={{ scrollBehavior: "auto", willChange: "scroll-position", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 p-6 rounded-xl border border-cyan-500/30 text-center">
                 <div className="text-cyan-300 text-sm mb-2">Current Avg</div>
                 <div className="text-4xl font-bold text-white">89%</div>
-                <div className="text-sm text-emerald-400 mt-1">
-                  ↑ +2% this week
-                </div>
+                <div className="text-sm text-emerald-400 mt-1">↑ +2% this week</div>
               </div>
               <div className="bg-gradient-to-br from-emerald-600/20 to-green-600/20 p-6 rounded-xl border border-emerald-500/30 text-center">
-                <div className="text-emerald-300 text-sm mb-2">
-                  Best Program
-                </div>
-                <div className="text-xl font-bold text-white">
-                  Supportive Conversation
-                </div>
+                <div className="text-emerald-300 text-sm mb-2">Best Program</div>
+                <div className="text-xl font-bold text-white">Supportive Conversation</div>
                 <div className="text-2xl font-bold text-emerald-400">94%</div>
               </div>
               <div className="bg-gradient-to-br from-amber-600/20 to-orange-600/20 p-6 rounded-xl border border-amber-500/30 text-center">
@@ -335,48 +226,19 @@ const KPIModal = ({ kpiData, onClose }) => {
 
             {/* Chart */}
             <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700">
-              <h4 className="text-lg font-semibold text-white mb-4">
-                Program Effectiveness
-              </h4>
+              <h4 className="text-lg font-semibold text-white mb-4">Program Effectiveness</h4>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={effectivenessData} layout="vertical">
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#374151"
-                      horizontal={false}
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
                     <XAxis type="number" stroke="#9CA3AF" domain={[70, 100]} />
-                    <YAxis
-                      dataKey="program"
-                      type="category"
-                      stroke="#9CA3AF"
-                      width={120}
-                    />
+                    <YAxis dataKey="program" type="category" stroke="#9CA3AF" width={120} />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#1F2937",
-                        borderColor: "#374151",
-                      }}
+                      contentStyle={{ backgroundColor: "#1F2937", borderColor: "#374151" }}
                       labelStyle={{ color: "#93C5FD" }}
                       formatter={(value) => [`${value}%`, "Effectiveness"]}
                     />
-                    <Bar
-                      dataKey="effectiveness"
-                      fill="#60A5FA"
-                      radius={[0, 4, 4, 0]}
-                    >
-                      {effectivenessData.map((entry, index) => (
-                        <rect
-                          key={`rect-${index}`}
-                          fill={
-                            mainPrograms
-                              .find((p) => p.title === entry.program)
-                              ?.barColor?.split(" ")[0] || "#60A5FA"
-                          }
-                        />
-                      ))}
-                    </Bar>
+                    <Bar dataKey="effectiveness" fill="#60A5FA" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -384,43 +246,25 @@ const KPIModal = ({ kpiData, onClose }) => {
 
             {/* Detailed Metrics */}
             <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700">
-              <h4 className="text-lg font-semibold text-white mb-4">
-                Effectiveness Trends
-              </h4>
+              <h4 className="text-lg font-semibold text-white mb-4">Effectiveness Trends</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {effectivenessData.map((item, index) => {
-                  const program = mainPrograms.find(
-                    (p) => p.title === item.program
-                  );
+                  const program = mainPrograms.find((p) => p.title === item.program);
                   return (
-                    <div
-                      key={index}
-                      className="bg-slate-900/50 p-4 rounded-lg border border-slate-700"
-                    >
+                    <div key={index} className="bg-slate-900/50 p-4 rounded-lg border border-slate-700">
                       <div className="flex items-center gap-3 mb-2">
-                        <div
-                          className={`bg-gradient-to-br ${program?.iconBg} p-2 rounded-lg`}
-                        >
+                        <div className={`bg-gradient-to-br ${program?.iconBg} p-2 rounded-lg`}>
                           <span className="text-lg">{program?.icon}</span>
                         </div>
                         <div>
-                          <div className="font-medium text-white">
-                            {item.program}
-                          </div>
-                          <div className="text-sm text-slate-400">
-                            {program?.tag}
-                          </div>
+                          <div className="font-medium text-white">{item.program}</div>
+                          <div className="text-sm text-slate-400">{program?.tag}</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center mt-3">
-                        <div className="text-2xl font-bold text-white">
-                          {item.effectiveness}%
-                        </div>
+                        <div className="text-2xl font-bold text-white">{item.effectiveness}%</div>
                         <div className="w-24 bg-slate-700 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full bg-gradient-to-r ${program?.barColor}`}
-                            style={{ width: `${item.effectiveness}%` }}
-                          ></div>
+                          <div className={`h-2 rounded-full bg-gradient-to-r ${program?.barColor}`} style={{ width: `${item.effectiveness}%` }} />
                         </div>
                       </div>
                     </div>
@@ -435,15 +279,7 @@ const KPIModal = ({ kpiData, onClose }) => {
         return (
           <div className="space-y-6">
             {/* Stats Summary */}
-            <div
-              className="grid grid-cols-2 md:grid-cols-4 gap-4"
-              style={{
-                scrollBehavior: "auto", //
-                willChange: "scroll-position",
-                WebkitOverflowScrolling: "touch",
-                overscrollBehavior: "contain",
-              }}
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4" style={{ scrollBehavior: "auto", willChange: "scroll-position", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
               <div className="bg-gradient-to-br from-violet-600/20 to-purple-600/20 p-4 rounded-xl border border-violet-500/30">
                 <div className="text-violet-300 text-sm">Total Programs</div>
                 <div className="text-2xl font-bold text-white">6</div>
@@ -457,70 +293,40 @@ const KPIModal = ({ kpiData, onClose }) => {
                 <div className="text-2xl font-bold text-white">16.5 min</div>
               </div>
               <div className="bg-gradient-to-br from-emerald-600/20 to-green-600/20 p-4 rounded-xl border border-emerald-500/30">
-                <div className="text-emerald-300 text-sm">
-                  Avg Effectiveness
-                </div>
+                <div className="text-emerald-300 text-sm">Avg Effectiveness</div>
                 <div className="text-2xl font-bold text-white">92.2%</div>
               </div>
             </div>
 
-            {/* Programs Grid - Using detailedPrograms instead of mainPrograms */}
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              style={{
-                scrollBehavior: "auto", //
-                willChange: "scroll-position",
-                WebkitOverflowScrolling: "touch",
-                overscrollBehavior: "contain",
-              }}
-            >
+            {/* Programs Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style={{ scrollBehavior: "auto", willChange: "scroll-position", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
               {detailedPrograms.map((program, index) => (
-                <div
-                  key={index}
-                  className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-2xl p-6 border border-slate-700 hover:border-purple-500/30 transition-all duration-300 group"
-                >
+                <div key={index} className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-2xl p-6 border border-slate-700 hover:border-purple-500/30 transition-all duration-300 group">
                   <div className="flex items-start gap-4 mb-4">
-                    <div
-                      className={`bg-gradient-to-br ${program.iconBg} p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform`}
-                    >
+                    <div className={`bg-gradient-to-br ${program.iconBg} p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform`}>
                       <span className="text-2xl">{program.icon}</span>
                     </div>
                     <div>
-                      <div className="font-bold text-white text-lg">
-                        {program.title}
-                      </div>
-                      <div
-                        className={`text-xs ${program.tagColor} font-semibold mt-1`}
-                      >
-                        {program.tag}
-                      </div>
+                      <div className="font-bold text-white text-lg">{program.title}</div>
+                      <div className={`text-xs ${program.tagColor} font-semibold mt-1`}>{program.tag}</div>
                     </div>
                   </div>
 
                   <p className="text-slate-300 text-sm mb-4">{program.desc}</p>
 
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-slate-400 text-sm">
-                      Duration: {program.time}
-                    </span>
-                    <span className="text-slate-400 text-sm">
-                      Effectiveness
-                    </span>
+                    <span className="text-slate-400 text-sm">Duration: {program.time}</span>
+                    <span className="text-slate-400 text-sm">Effectiveness</span>
                   </div>
 
                   <div className="w-full bg-slate-700/50 rounded-full h-2.5 mb-3">
-                    <div
-                      className={`h-2.5 rounded-full bg-gradient-to-r ${program.barColor} relative`}
-                      style={{ width: `${program.percent}%` }}
-                    >
+                    <div className={`h-2.5 rounded-full bg-gradient-to-r ${program.barColor} relative`} style={{ width: `${program.percent}%` }}>
                       <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
                     </div>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-white">
-                      {program.percent}%
-                    </span>
+                    <span className="text-2xl font-bold text-white">{program.percent}%</span>
                     <button className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs rounded-lg font-medium hover:from-purple-500 hover:to-indigo-500 transition-colors">
                       Start
                     </button>
@@ -534,9 +340,7 @@ const KPIModal = ({ kpiData, onClose }) => {
       default:
         return (
           <div className="text-center py-12">
-            <div className="text-2xl font-bold text-white mb-4">
-              KPI Details
-            </div>
+            <div className="text-2xl font-bold text-white mb-4">KPI Details</div>
             <div className="text-slate-400">No detailed data available</div>
           </div>
         );
@@ -549,44 +353,23 @@ const KPIModal = ({ kpiData, onClose }) => {
         {/* Header */}
         <div className="sticky top-0 bg-slate-900/90 p-6 border-b border-slate-700 flex justify-between items-center z-10">
           <div className="flex items-center gap-4">
-            <div
-              className={`bg-gradient-to-br ${kpiData.bg} p-3 rounded-xl shadow-lg w-16 h-16 flex items-center justify-center`}
-            >
+            <div className={`bg-gradient-to-br ${kpiData.bg} p-3 rounded-xl shadow-lg w-16 h-16 flex items-center justify-center`}>
               <span className="text-3xl">{kpiData.icon}</span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">{kpiData.label}</h2>
-              <div className="text-slate-400 text-lg">
-                Value: {kpiData.value}
-              </div>
+              <div className="text-slate-400 text-lg">Value: {kpiData.value}</div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-3 rounded-full hover:bg-slate-700 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-7 w-7 text-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
+          <button onClick={onClose} className="p-3 rounded-full hover:bg-slate-700 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Content */}
-        <div
-          className="overflow-y-auto max-h-[calc(90vh-140px)] p-6"
-          style={{ scrollBehavior: "smooth" }}
-        >
+        <div className="overflow-y-auto max-h-[calc(90vh-140px)] p-6" style={{ scrollBehavior: "smooth" }}>
           {renderContent()}
         </div>
       </div>
@@ -610,34 +393,14 @@ export default function Intervention() {
   }, []);
 
   const icons = [
-    {
-      icon: "💗",
-      label: "Sessions Completed",
-      value: 24,
-      color: "text-pink-400",
-      bg: "from-pink-500 to-rose-500",
-    },
-    {
-      icon: "📈",
-      label: "Avg Effectiveness",
-      value: effectiveness + "%",
-      color: "text-cyan-400",
-      bg: "from-cyan-500 to-blue-500",
-    },
-    {
-      icon: "🧠",
-      label: "Available Programs",
-      value: 6,
-      color: "text-violet-400",
-      bg: "from-violet-500 to-purple-500",
-    },
+    { icon: "💗", label: "Sessions Completed", value: 24, color: "text-pink-400", bg: "from-pink-500 to-rose-500" },
+    { icon: "📈", label: "Avg Effectiveness", value: effectiveness + "%", color: "text-cyan-400", bg: "from-cyan-500 to-blue-500" },
+    { icon: "🧠", label: "Available Programs", value: 6, color: "text-violet-400", bg: "from-violet-500 to-purple-500" },
   ];
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setEffectiveness(() =>
-        Math.round(89 + Math.sin(Date.now() / 4000) * 1.0)
-      );
+      setEffectiveness(() => Math.round(89 + Math.sin(Date.now() / 4000) * 1.0));
     }, 1200);
     return () => clearInterval(timer);
   }, []);
@@ -648,9 +411,7 @@ export default function Intervention() {
     const d = document.createElement("div");
     d.style.margin = "8px 0";
     d.style.padding = "10px";
-    d.style.background = sender.includes("MAITRI")
-      ? "rgba(99,102,241,0.1)"
-      : "rgba(139,92,246,0.1)";
+    d.style.background = sender.includes("MAITRI") ? "rgba(99,102,241,0.1)" : "rgba(139,92,246,0.1)";
     d.style.borderRadius = "12px";
     d.innerHTML = sender + ": " + text;
     log.appendChild(d);
@@ -706,8 +467,7 @@ export default function Intervention() {
       left: "50%",
       bottom: "32px",
       transform: "translateX(-50%)",
-      background:
-        "linear-gradient(135deg, rgba(99,102,241,0.95), rgba(139,92,246,0.95))",
+      background: "linear-gradient(135deg, rgba(99,102,241,0.95), rgba(139,92,246,0.95))",
       padding: "14px 24px",
       borderRadius: "24px",
       color: "#fff",
@@ -730,33 +490,19 @@ export default function Intervention() {
       <style>{`
         .intervention-theme .text-cyan-300,
         .intervention-theme .text-cyan-400,
-        .intervention-theme .text-slate-300 {
-          color: #bbf7d0 !important;
-        }
-        .intervention-theme .text-slate-400 {
-          color: #c4f1f9 !important;
-        }
+        .intervention-theme .text-slate-300 { color: #bbf7d0 !important; }
+        .intervention-theme .text-slate-400 { color: #c4f1f9 !important; }
         .intervention-theme .bg-slate-900\\/80,
         .intervention-theme .bg-slate-900\\/70,
         .intervention-theme .bg-slate-900\\/60,
-        .intervention-theme .bg-slate-900\\/50 {
-          background-color: rgba(4, 47, 46, 0.55) !important;
-        }
-        .intervention-theme .border-white\\/5 {
-          border-color: rgba(45, 212, 191, 0.25) !important;
-        }
-        .intervention-theme .hover\\:border-white\\/20:hover {
-          border-color: rgba(16, 185, 129, 0.45) !important;
-        }
+        .intervention-theme .bg-slate-900\\/50 { background-color: rgba(4, 47, 46, 0.55) !important; }
+        .intervention-theme .border-white\\/5 { border-color: rgba(45, 212, 191, 0.25) !important; }
+        .intervention-theme .hover\\:border-white\\/20:hover { border-color: rgba(16, 185, 129, 0.45) !important; }
         .intervention-theme .border-slate-700,
         .intervention-theme .border-slate-700\\/50,
-        .intervention-theme .border-slate-600 {
-          border-color: rgba(34, 197, 94, 0.35) !important;
-        }
+        .intervention-theme .border-slate-600 { border-color: rgba(34, 197, 94, 0.35) !important; }
         .intervention-theme .hover\\:border-slate-600:hover,
-        .intervention-theme .hover\\:border-purple-500\\/30:hover {
-          border-color: rgba(16, 185, 129, 0.5) !important;
-        }
+        .intervention-theme .hover\\:border-purple-500\\/30:hover { border-color: rgba(16, 185, 129, 0.5) !important; }
         .intervention-theme .bg-gradient-to-r.from-cyan-400.via-blue-400.to-purple-400 {
           background-image: linear-gradient(90deg, #34d399, #22d3ee, #60a5fa) !important;
         }
@@ -770,60 +516,31 @@ export default function Intervention() {
           50% { transform: translateY(-5px) rotate(-2deg) scale(1.08);}
           75% { transform: translateY(-2px) rotate(1deg) scale(1.05);}
         }
-        .animate-icon-float {
-          animation: icon-float 4s ease-in-out infinite;
-        }
-        @keyframes card-in {
-          from { opacity:0; transform: translateY(40px) scale(.95);}
-          to { opacity:1; transform: translateY(0) scale(1);}
-        }
-        .card-in {
-          animation: card-in 0.7s cubic-bezier(.34,1.56,.64,1) both;
-        }
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
+        .animate-icon-float { animation: icon-float 4s ease-in-out infinite; }
+        @keyframes card-in { from { opacity:0; transform: translateY(40px) scale(.95);} to { opacity:1; transform: translateY(0) scale(1);} }
+        .card-in { animation: card-in 0.7s cubic-bezier(.34,1.56,.64,1) both; }
+        @keyframes shimmer { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
         .shimmer-effect::before {
           content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
+          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
           background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
           transform: translateX(-100%);
         }
-        .shimmer-effect:hover::before {
-          animation: shimmer 1.5s ease-in-out;
-        }
+        .shimmer-effect:hover::before { animation: shimmer 1.5s ease-in-out; }
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
           50% { box-shadow: 0 0 35px rgba(139, 92, 246, 0.8); }
         }
-        .pulse-glow {
-          animation: pulse-glow 2.5s ease-in-out infinite;
-        }
-        .progress-glow {
-          position: relative;
-        }
+        .pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+        .progress-glow { position: relative; }
         .progress-glow::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 4px;
-          height: 100%;
-          background: rgba(255,255,255,0.9);
-          border-radius: 2px;
-          box-shadow: 0 0 10px rgba(255,255,255,0.8);
+          content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%;
+          background: rgba(255,255,255,0.9); border-radius: 2px; box-shadow: 0 0 10px rgba(255,255,255,0.8);
         }
       `}</style>
 
       {/* KPI Modal */}
-      {selectedKPI && (
-        <KPIModal kpiData={selectedKPI} onClose={() => setSelectedKPI(null)} />
-      )}
+      {selectedKPI && <KPIModal kpiData={selectedKPI} onClose={() => setSelectedKPI(null)} />}
 
       <div className="relative flex w-full flex-col px-6 py-8 lg:px-10">
         {/* Header */}
@@ -833,9 +550,7 @@ export default function Intervention() {
           </h1>
           <div className="flex items-center gap-3 text-cyan-300 text-base">
             <span className="animate-icon-float text-3xl">🧬</span>
-            <span className="font-medium">
-              Evidence-based techniques for emotional and physical well-being
-            </span>
+            <span className="font-medium">Evidence-based techniques for emotional and physical well-being</span>
           </div>
         </section>
 
@@ -848,20 +563,13 @@ export default function Intervention() {
               style={{ animationDelay: `${0.05 * idx}s` }}
               onClick={() => setSelectedKPI({ icon, label, value, color, bg })}
             >
-              <div
-                className={`bg-gradient-to-br ${bg} backdrop-blur-sm rounded-2xl p-6 border border-white/5 hover:border-white/20 transition-all duration-500 hover:scale-105`}
-              >
+              <div className={`bg-gradient-to-br ${bg} backdrop-blur-sm rounded-2xl p-6 border border-white/5 hover:border-white/20 transition-all duration-500 hover:scale-105`}>
                 <div className="flex items-start justify-between mb-3">
-                  <div
-                    className={`text-4xl ${color}`}
-                    style={{ animationDelay: `${0.2 * idx}s` }}
-                  >
+                  <div className={`text-4xl ${color}`} style={{ animationDelay: `${0.2 * idx}s` }}>
                     {icon}
                   </div>
                 </div>
-                <div className="text-sm text-slate-400 font-medium mb-1">
-                  {label}
-                </div>
+                <div className="text-sm text-slate-400 font-medium mb-1">{label}</div>
                 <div className="text-4xl font-black text-white">{value}</div>
               </div>
             </div>
@@ -869,7 +577,7 @@ export default function Intervention() {
         </section>
 
         {/* Program Cards - Using mainPrograms */}
-        {rows.map((row, rIdx) => (
+        {[mainPrograms.slice(0, 3), mainPrograms.slice(3, 6)].map((row, rIdx) => (
           <section className="grid md:grid-cols-3 gap-6 mb-6" key={rIdx}>
             {row.map((prog, i) => (
               <article
@@ -880,13 +588,8 @@ export default function Intervention() {
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-slate-700/50 hover:border-slate-600 transition-all duration-500 hover:scale-[1.02]">
                   {/* Icon */}
                   <div className="flex items-start justify-between mb-4">
-                    <div
-                      className={`bg-gradient-to-br ${prog.iconBg} rounded-2xl p-4 shadow-lg`}
-                    >
-                      <span
-                        className="text-3xl animate-icon-float block"
-                        style={{ animationDelay: `${0.15 * (i + rIdx * 3)}s` }}
-                      >
+                    <div className={`bg-gradient-to-br ${prog.iconBg} rounded-2xl p-4 shadow-lg`}>
+                      <span className="text-3xl animate-icon-float block" style={{ animationDelay: `${0.15 * (i + rIdx * 3)}s` }}>
                         {prog.icon}
                       </span>
                     </div>
@@ -896,38 +599,23 @@ export default function Intervention() {
                   </div>
 
                   {/* Content */}
-                  <h3 className="font-bold mb-2 text-xl text-white">
-                    {prog.title}
-                  </h3>
-                  <p className="text-slate-300 text-sm mb-4 leading-relaxed min-h-[40px]">
-                    {prog.desc}
-                  </p>
+                  <h3 className="font-bold mb-2 text-xl text-white">{prog.title}</h3>
+                  <p className="text-slate-300 text-sm mb-4 leading-relaxed min-h-[40px]">{prog.desc}</p>
 
                   {/* Tag */}
                   <div className="flex justify-between items-center mb-3">
-                    <span
-                      className={`text-xs ${prog.tagColor} font-bold uppercase tracking-wider`}
-                    >
-                      {prog.tag}
-                    </span>
-                    <span className="text-xs text-slate-400 font-semibold">
-                      Effectiveness
-                    </span>
+                    <span className={`text-xs ${prog.tagColor} font-bold uppercase tracking-wider`}>{prog.tag}</span>
+                    <span className="text-xs text-slate-400 font-semibold">Effectiveness</span>
                   </div>
 
                   {/* Progress Bar */}
                   <div className="relative w-full bg-slate-700/30 h-2.5 rounded-full overflow-hidden mb-4 shadow-inner">
-                    <div
-                      className={`progress-glow h-full rounded-full bg-gradient-to-r ${prog.barColor} transition-all duration-1000`}
-                      style={{ width: `${prog.percent}%` }}
-                    ></div>
+                    <div className={`progress-glow h-full rounded-full bg-gradient-to-r ${prog.barColor} transition-all duration-1000`} style={{ width: `${prog.percent}%` }}></div>
                   </div>
 
                   {/* Percentage */}
                   <div className="text-right mb-5">
-                    <span className="text-2xl font-black text-white">
-                      {prog.percent}%
-                    </span>
+                    <span className="text-2xl font-black text-white">{prog.percent}%</span>
                   </div>
 
                   {/* Button */}
@@ -936,8 +624,7 @@ export default function Intervention() {
                     className="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white px-5 py-3 rounded-2xl font-bold transition-all duration-300 border border-slate-600/50"
                     onClick={() => {
                       showToast("Starting " + prog.title + " session...");
-                      if(prog.title === "Supportive Conversation") {
-                        console.log("Opening chat for Supportive Conversation");
+                      if (prog.title === "Supportive Conversation") {
                         setTimeout(() => setChatOpen(true), 800);
                       }
                     }}

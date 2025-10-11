@@ -474,42 +474,7 @@ export default function Report() {
       `}</style>
 
       {/* Main Content */}
-      <div className="report-theme relative min-h-screen overflow-hidden bg-gradient-to-br from-[#020d1f] via-[#031735] to-[#00040c] font-inter text-[#f5fbff]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_60%)]" />
-        <div className="pointer-events-none absolute -left-32 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(147,197,253,0.15),transparent_70%)] blur-3xl" />
-        <div className="pointer-events-none absolute -right-24 top-1/2 h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.12),transparent_75%)] blur-3xl" />
-        <style>{`
-          .report-theme .text-sky-300 {
-            color: #fcd34d !important;
-          }
-          .report-theme .border-slate-600,
-          .report-theme .border-slate-500,
-          .report-theme .border-slate-700,
-          .report-theme .border-slate-400 {
-            border-color: rgba(251, 191, 36, 0.35) !important;
-          }
-          .report-theme .hover\\:border-slate-400:hover,
-          .report-theme .hover\\:border-slate-500:hover {
-            border-color: rgba(253, 224, 71, 0.55) !important;
-          }
-          .report-theme .bg-slate-800,
-          .report-theme .bg-slate-700 {
-            background-color: rgba(15, 23, 42, 0.68) !important;
-          }
-          .report-theme .bg-gradient-to-r.from-blue-500.to-sky-500,
-          .report-theme .bg-gradient-to-r.from-blue-400.to-indigo-400,
-          .report-theme .bg-gradient-to-r.from-sky-400.to-blue-500,
-          .report-theme .bg-gradient-to-r.from-sky-400.via-blue-400.to-indigo-500 {
-            background-image: linear-gradient(90deg, #60a5fa, #fbbf24) !important;
-          }
-          .report-theme .bg-blue-800 {
-            background-color: rgba(30, 64, 175, 0.65) !important;
-          }
-          .report-theme .hover\\:bg-blue-900:hover {
-            background-color: rgba(30, 58, 138, 0.75) !important;
-          }
-        `}</style>
-        <div className="relative z-10 flex w-full flex-col px-6 pb-12 pt-8 lg:px-12">
+      <div className="font-inter text-[#e8f6ff] min-h-screen p-8">
         <style>{`
           @keyframes floatGlow {
             0%, 100% { 
@@ -620,7 +585,7 @@ export default function Report() {
           }
         `}</style>
 
-        <header className="px-0">
+        <header className="px-4">
           <h1 className="text-5xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-blue-400 to-indigo-500 animate-pulse select-none">
             Mission Reports
           </h1>
@@ -631,7 +596,7 @@ export default function Report() {
 
         <main className="mt-8 space-y-8">
           {/* Generate Report Panel */}
-          <section className="bg-[#141b24]/80 backdrop-blur-md rounded-xl p-8 border border-slate-700 shadow-lg shadow-blue-500/20 card-hover transform-gpu transition-transform">
+          <section className="bg-[#141b24]/80 backdrop-blur-md rounded-xl p-8 border border-slate-700 shadow-lg shadow-blue-500/20 max-w-7xl mx-auto card-hover transform-gpu transition-transform">
             <h3 className="flex items-center gap-2 text-xl mb-4 font-semibold select-none">
               <span className="text-2xl icon-float icon-delay-0 select-none">
                 📄
@@ -686,7 +651,7 @@ export default function Report() {
           </section>
 
           {/* Overall Health Metrics and Key Insights */}
-          <section className="grid lg:grid-cols-2 gap-6">
+          <section className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
             {/* Overall Health Metrics */}
             <div className="bg-[#141b24]/80 backdrop-blur-md rounded-xl p-8 border border-slate-700 shadow-lg shadow-blue-500/10 card-hover transform-gpu transition-transform">
               <h3 className="flex items-center gap-2 text-xl mb-4 font-semibold select-none">
@@ -761,7 +726,7 @@ export default function Report() {
           </section>
 
           {/* Detailed Stats */}
-          <section className="bg-[#141b24]/80 backdrop-blur-md rounded-xl p-8 border border-slate-700 shadow-lg shadow-blue-500/10 card-hover transform-gpu transition-transform">
+          <section className="bg-[#141b24]/80 backdrop-blur-md rounded-xl p-8 border border-slate-700 shadow-lg shadow-blue-500/10 max-w-7xl mx-auto card-hover transform-gpu transition-transform">
             <h3 className="flex items-center gap-2 text-xl mb-6 font-semibold select-none">
               <span className="icon-float icon-delay-2 select-none">📈</span>{" "}
               Detailed Statistics
@@ -807,7 +772,7 @@ export default function Report() {
           </section>
 
           {/* Emotion Trends */}
-          <section className="rounded-xl p-8 bg-[#141b24]/80 backdrop-blur-md border border-slate-700 shadow-lg shadow-blue-500/10 select-none">
+          <section className="max-w-7xl mx-auto rounded-xl p-8 bg-[#141b24]/80 backdrop-blur-md border border-slate-700 shadow-lg shadow-blue-500/10 select-none">
             <h3 className="mb-4 text-xl font-semibold">
               Emotion Trends (Last 7 Days)
             </h3>
@@ -839,7 +804,7 @@ export default function Report() {
           </section>
 
           {/* Export Buttons */}
-          <section className="grid grid-cols-3 gap-6 mt-12 px-4">
+          <section className="max-w-7xl mx-auto grid grid-cols-3 gap-6 mt-12 px-4">
             {[
               { label: "Export as PDF", icon: "🖨", onClick: handleExportPDF },
               { label: "Export as CSV", icon: "📄", onClick: handleExportCSV },
@@ -998,7 +963,6 @@ export default function Report() {
           </div>
         </div>
       )}
-      </div>
     </>
   );
 }
