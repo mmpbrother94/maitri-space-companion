@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import "./launch.css";
-import rocketSvg from "../../assets/rocket.svg";
+// import rocketSvg from "../../assets/rocket.svg";
 
 type RocketLaunchProps = {
   timeout: number;

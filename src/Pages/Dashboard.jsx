@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   BarChart3,
@@ -57,6 +57,17 @@ function DashboardLayout() {
   const [currentTime, setCurrentTime] = useState(() => new Date());
   const location = useLocation();
 
+  // Chatbot state
+  const [chatOpen, setChatOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      from: "maitri",
+      text: "👋 Namaste, Commander. I can chat, track vitals, and suggest interventions.",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const logRef = useRef(null);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
@@ -67,6 +78,11 @@ function DashboardLayout() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  // Chatbot effects
+  useEffect(() => {
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+  }, [messages, chatOpen]);
 
   const missionClock = useMemo(() => {
     const options = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
@@ -86,8 +102,149 @@ function DashboardLayout() {
 
   const isDetectionRoute = location.pathname.startsWith("/dashboard/emotions");
 
+  // Chatbot functions
+  function replyTo(t) {
+    const text = t.toLowerCase();
+    if (text.includes("stress"))
+      return "Breathing 5 min + Mindfulness 10 min are recommended. Start session?";
+    if (text.includes("family") || text.includes("home"))
+      return "I'm here with you. Want me to play a family-style message and soft music?";
+    if (text.includes("sleep"))
+      return "Target 7–8h sleep. I can dim UI and queue a soundscape.";
+    return "Logged. I can also open Interventions or start an Emotion Scan.";
+  }
+
+  function sendMessage(msg) {
+    if (!msg) return;
+    setMessages((m) => [...m, { from: "you", text: msg }]);
+    setInput("");
+    setTimeout(() => {
+      setMessages((m) => [...m, { from: "maitri", text: replyTo(msg) }]);
+    }, 700);
+  }
+
+  const chips = ["I'm stressed", "I miss my family", "I can't sleep"];
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030b24] text-white">
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+          50% { opacity: 1; box-shadow: 0 0 40px rgba(56, 189, 248, 0.6); }
+        }
+        @keyframes slide-in {
+          from { opacity: 0; transform: translateX(100%); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        @keyframes typing-dots {
+          0%, 20% { content: '.'; }
+          40% { content: '..'; }
+          60%, 100% { content: '...'; }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .animate-slide-in { animation: slide-in 0.4s ease-out; }
+        .animate-slide-up { animation: slide-up 0.5s ease-out; }
+        
+        .gradient-text {
+          background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #3b82f6 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        
+        .glass-nav {
+          background: linear-gradient(145deg, rgba(15,23,42,0.8), rgba(30,41,59,0.8));
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(56,189,248,0.2);
+        }
+        
+        .glass-chat {
+          background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(56,189,248,0.3);
+        }
+        
+        .nav-link {
+          position: relative;
+          transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+          transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after,
+        .nav-link-active::after {
+          width: 100%;
+        }
+        
+        .chat-message {
+          animation: slide-up 0.3s ease-out;
+        }
+        
+        .shimmer-bg {
+          background: linear-gradient(
+            90deg,
+            rgba(15,23,42,0) 0%,
+            rgba(56,189,248,0.15) 50%,
+            rgba(15,23,42,0) 100%
+          );
+          background-size: 1000px 100%;
+          animation: shimmer 3s infinite linear;
+        }
+        
+        .floating-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(100px);
+          opacity: 0.3;
+          animation: float 8s ease-in-out infinite;
+        }
+        
+        .glow-button {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .glow-button::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
+          transform: translate(-50%, -50%);
+          transition: width 0.6s, height 0.6s;
+        }
+        
+        .glow-button:hover::before {
+          width: 300px;
+          height: 300px;
+        }
+      `}</style>
+
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_65%)] opacity-80" />
       <div className="pointer-events-none absolute bottom-[-26rem] left-1/2 h-[48rem] w-[48rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.12),transparent_70%)]" />
       <div className="relative flex min-h-screen w-full flex-col px-0 pb-16 pt-4 lg:px-0">
@@ -199,6 +356,109 @@ function DashboardLayout() {
           <Outlet context={outletContext} />
         </main>
       </div>
+
+      {/* Floating Chat Button */}
+      <button
+        onClick={() => setChatOpen((o) => !o)}
+        aria-label="Open MAITRI Companion"
+        className="fixed right-14 bottom-14 z-50 w-32 h-32 rounded-full flex items-center justify-center text-2xl shadow-2xl hover:scale-110 cursor-pointer"
+      >
+        <img src="/discord-clyde-bot.gif" alt="" />
+      </button>
+
+      {/* Chat Panel */}
+      {chatOpen && (
+        <div className="fixed right-8 bottom-4 z-50">
+          <img
+            src="/pom-bot-creatives.gif"
+            alt=""
+            className="absolute -z-20 -top-36 right-48 animate-slide-in"
+          />
+          <div className="z-50 w-96 max-h-[75vh] glass-chat rounded-2xl p-5 shadow-2xl flex flex-col animate-slide-in">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl animate-float">🫶</div>
+                <div>
+                  <strong className="gradient-text text-lg">
+                    MAITRI Companion
+                  </strong>
+                  <div className="text-xs text-emerald-400 flex items-center gap-1">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    Online
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setChatOpen(false)}
+                className="text-slate-400 hover:text-white text-2xl transition-colors hover:rotate-90 duration-300 cursor-pointer"
+              >
+                ✖
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div
+              ref={logRef}
+              className="overflow-auto flex-1 text-sm space-y-3 mb-4 pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+            >
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`chat-message flex ${
+                    m.from === "you" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                      m.from === "you"
+                        ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-lg"
+                        : "glass-nav text-slate-100 border border-slate-700/50"
+                    }`}
+                  >
+                    <div className="text-xs opacity-70 mb-1 font-semibold">
+                      {m.from === "you" ? "You" : "MAITRI"}
+                    </div>
+                    <div dangerouslySetInnerHTML={{ __html: m.text }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Reply Chips */}
+            <div className="flex gap-2 mb-4 flex-wrap">
+              {chips.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => sendMessage(c)}
+                  className="glass-nav px-3 py-1.5 rounded-full text-xs font-semibold text-cyan-400 hover:bg-slate-700/50 transition-all duration-300 border border-cyan-500/30 hover:border-cyan-500/60 hover:scale-105"
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* Input Area */}
+            <div className="flex gap-3">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") sendMessage(input);
+                }}
+                className="flex-1 bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-500/50 transition-colors"
+                placeholder="Type a message…"
+              />
+              <button
+                onClick={() => sendMessage(input)}
+                className="glow-button bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 px-5 py-3 rounded-xl font-semibold text-white hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 cursor-pointer"
+              >
+                <span className="relative z-10">Send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

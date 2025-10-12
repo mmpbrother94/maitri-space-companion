@@ -9,7 +9,7 @@ import CommandBar from "../components/CommandBar";
 import SuggestionCard from "../features/detection/SuggestionCard";
 import { useEmotionBridge } from "../features/detection/useEmotionBridge";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
+// Remove backend dependency - simulate locally
 const DEFAULT_EMOTIONS = [
   "Happy",
   "Calm",
@@ -24,192 +24,53 @@ const EMOTION_VISUALS = {
   Happy: {
     color: "from-emerald-400 to-green-500",
     text: "text-emerald-400",
-    icon: "\u{1F60A}",
+    icon: "😊",
   },
   Calm: {
     color: "from-cyan-400 to-sky-500",
     text: "text-cyan-300",
-    icon: "\u{1F60C}",
+    icon: "😌",
   },
   Focused: {
     color: "from-blue-400 to-indigo-500",
     text: "text-blue-300",
-    icon: "\u{1F9E0}",
+    icon: "🧐",
   },
   Stressed: {
     color: "from-amber-400 to-orange-500",
     text: "text-amber-300",
-    icon: "\u{1F625}",
+    icon: "😰",
   },
   Anxious: {
     color: "from-purple-400 to-violet-500",
     text: "text-purple-300",
-    icon: "\u{1F630}",
+    icon: "😟",
   },
   Sad: {
     color: "from-slate-400 to-slate-600",
     text: "text-slate-300",
-    icon: "\u{1F622}",
+    icon: "😢",
   },
   Neutral: {
     color: "from-slate-400 to-slate-500",
     text: "text-slate-200",
-    icon: "\u{1F610}",
+    icon: "😐",
   },
-  Angry: {
-    color: "from-red-400 to-rose-500",
-    text: "text-rose-300",
-    icon: "\u{1F620}",
-  },
-  Fearful: {
-    color: "from-amber-500 to-yellow-600",
-    text: "text-amber-200",
-    icon: "\u{1F628}",
-  },
-  Disgust: {
-    color: "from-lime-500 to-green-600",
-    text: "text-lime-200",
-    icon: "\u{1F922}",
-  },
-  Surprised: {
-    color: "from-pink-400 to-pink-600",
-    text: "text-pink-200",
-    icon: "\u{1F62E}",
-  },
-};
-
-const INSIGHT_SOURCE_LABELS = {
-  face: "Facial Analysis",
-  voice: "Vocal Analysis",
-  fused: "Combined Read",
 };
 
 const INSIGHT_SUPPORT_COPY = {
   Happy:
     "Energy levels are high. Want me to capture this in your mood log or celebrate with your favourite track?",
-  Calm:
-    "Breathing and tone look settled. I can stand guard while you stay in this flow.",
+  Calm: "Breathing and tone look settled. I can stand guard while you stay in this flow.",
   Focused:
     "You are locked in. I can block interruptions or schedule a precision break when you are ready.",
   Stressed:
     "Tension cues detected. Ready for a grounding breath or a quick handoff to mission support?",
   Anxious:
     "Alertness is up. We can slow down with a breathing pattern or reach out to support together.",
-  Sad:
-    "I feel the weight with you. Want a compassion prompt or to leave a note for the support crew?",
+  Sad: "I feel the weight with you. Want a compassion prompt or to leave a note for the support crew?",
   Neutral:
     "Signals look steady. I will keep watch and surface any changes as they happen.",
-  Angry:
-    "There is fire in your tone. Vent with me or we can move through a quick reset routine.",
-  Fearful:
-    "There is concern in your voice. Let us steady the breath and outline the next safe step.",
-  Disgust:
-    "Something is off. Share it and I will record the details for follow-up.",
-  Surprised:
-    "A spike in surprise just registered. Need me to capture what happened for the log?",
-};
-
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
-const ensureEmotionOrder = (probs, fallback) => {
-  if (!probs) return fallback;
-  return Object.keys(probs);
-};
-
-const safeParseJson = (text, fallback = {}) => {
-  if (!text) return fallback;
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    return fallback;
-  }
-};
-
-const writeString = (view, offset, string) => {
-  for (let i = 0; i < string.length; i += 1) {
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
-};
-
-const encodeWav = (samples, sampleRate) => {
-  const buffer = new ArrayBuffer(44 + samples.length * 2);
-  const view = new DataView(buffer);
-
-  writeString(view, 0, "RIFF");
-  view.setUint32(4, 36 + samples.length * 2, true);
-  writeString(view, 8, "WAVE");
-  writeString(view, 12, "fmt ");
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, 1, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true);
-  writeString(view, 36, "data");
-  view.setUint32(40, samples.length * 2, true);
-
-  let offset = 44;
-  for (let i = 0; i < samples.length; i += 1, offset += 2) {
-    const x = Math.max(-1, Math.min(1, samples[i]));
-    view.setInt16(offset, x < 0 ? x * 0x8000 : x * 0x7fff, true);
-  }
-
-  return buffer;
-};
-
-const resampleTo = (channelData, sourceRate, targetRate) => {
-  if (sourceRate === targetRate) return new Float32Array(channelData);
-
-  const ratio = sourceRate / targetRate;
-  const length = Math.max(1, Math.round(channelData.length / ratio));
-  const result = new Float32Array(length);
-
-  for (let i = 0; i < length; i += 1) {
-    const position = i * ratio;
-    const index = Math.floor(position);
-    const fraction = position - index;
-    const nextIndex =
-      index + 1 < channelData.length ? index + 1 : channelData.length - 1;
-    const sample =
-      channelData[index] * (1 - fraction) + channelData[nextIndex] * fraction;
-    result[i] = sample;
-  }
-
-  return result;
-};
-
-const adjustDuration = (data, sampleRate, minSeconds, maxSeconds) => {
-  const min = Math.round(sampleRate * minSeconds);
-  const max = Math.round(sampleRate * maxSeconds);
-  if (data.length > max) {
-    return data.subarray(0, max);
-  }
-  if (data.length < min) {
-    const padded = new Float32Array(min);
-    padded.set(data);
-    return padded;
-  }
-  return data;
-};
-
-const averageChannels = (audioBuffer) => {
-  if (audioBuffer.numberOfChannels === 1) {
-    return new Float32Array(audioBuffer.getChannelData(0));
-  }
-
-  const { length } = audioBuffer;
-  const temp = new Float32Array(length);
-  for (let c = 0; c < audioBuffer.numberOfChannels; c += 1) {
-    const channel = audioBuffer.getChannelData(c);
-    for (let i = 0; i < length; i += 1) {
-      temp[i] += channel[i];
-    }
-  }
-  for (let i = 0; i < length; i += 1) {
-    temp[i] /= audioBuffer.numberOfChannels;
-  }
-  return temp;
 };
 
 const InsightCard = ({ insight, active }) => (
@@ -241,14 +102,7 @@ const InsightCard = ({ insight, active }) => (
   </div>
 );
 
-const EmotionBars = ({
-  title,
-  latency,
-  active,
-  result,
-  fallbackLabels,
-}) => {
-  const labels = ensureEmotionOrder(result?.probs, fallbackLabels);
+const EmotionBars = ({ title, active, bars }) => {
   return (
     <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-500">
       <div className="flex items-center gap-3 mb-4">
@@ -261,21 +115,14 @@ const EmotionBars = ({
           />
           <span>{active ? "Live" : "Standby"}</span>
         </div>
-        {latency != null && (
-          <span className="text-xs font-semibold text-slate-300 bg-slate-900/80 px-2 py-1 rounded-full border border-slate-600/60">
-            ~{Math.round(latency)} ms
-          </span>
-        )}
       </div>
-
       <div className="space-y-4">
-        {labels.map((label) => {
+        {DEFAULT_EMOTIONS.map((label) => {
           const styles = EMOTION_VISUALS[label] ?? {
             color: "from-slate-500 to-slate-600",
             text: "text-slate-200",
           };
-          const probability = result?.probs?.[label] ?? 0;
-          const percent = Math.round(probability * 100);
+          const percent = bars[label] || 0;
           return (
             <div key={label} className="flex items-center gap-4">
               <div className="w-24 text-sm font-semibold text-slate-300">
@@ -300,54 +147,11 @@ const EmotionBars = ({
   );
 };
 
-function EmotionAvatarBadge({ summary, styles, active }) {
-  if (!summary) return null;
-  const confidenceText =
-    summary.confidence != null
-      ? `${summary.emotion} (${summary.confidence}% confidence)`
-      : summary.emotion ?? "Standby";
-  const helperText =
-    summary.confidence != null
-      ? "I'm here to support you."
-      : "Start detection to receive live updates.";
-
-  return (
-    <div className="pointer-events-none absolute -bottom-16 left-6 flex items-center gap-3">
-      <div
-        className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${styles.color} shadow-[0_18px_45px_rgba(59,130,246,0.25)]`}
-      >
-        <span className="text-4xl drop-shadow-[0_6px_12px_rgba(15,23,42,0.75)]">
-          {styles.icon ?? "\u{1F642}"}
-        </span>
-        <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full border border-emerald-500/60 bg-emerald-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-emerald-100 shadow-[0_0_10px_rgba(16,185,129,0.5)]">
-          {active ? "Online" : "Standby"}
-        </span>
-      </div>
-      <div className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 shadow-[0_12px_30px_rgba(59,130,246,0.25)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-fuchsia-200/80">
-          MAITRI Avatar
-        </p>
-        <p className="mt-1 text-sm font-semibold text-white">{confidenceText}</p>
-        <p className="text-xs text-slate-300 mt-1">{helperText}</p>
-      </div>
-    </div>
-  );
-}
-
-function MaitriRobotOverlay({ active }) {
-  return (
-    <div className="pointer-events-none absolute -top-16 right-8 hidden md:block">
-      <EmotionRobotBadge size={80} tilt={!active} animated />
-    </div>
-  );
-}
-
 function EmotionRobotBadge({ size = 72, animated = true, tilt = false }) {
   const dimension =
     typeof size === "number" ? size : Number.parseInt(size, 10) || 72;
   const glowClass = animated ? "animate-pulse" : "";
   const tiltClass = tilt ? "animate-[tilt_3s_ease-in-out_infinite]" : "";
-
   return (
     <div
       className={`relative flex items-center justify-center ${glowClass} ${tiltClass}`}
@@ -366,11 +170,23 @@ function EmotionRobotBadge({ size = 72, animated = true, tilt = false }) {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="emotion-bot-shell" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient
+            id="emotion-bot-shell"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
             <stop offset="0%" stopColor="#ff8c5a" />
             <stop offset="100%" stopColor="#ff3f64" />
           </linearGradient>
-          <linearGradient id="emotion-bot-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient
+            id="emotion-bot-glow"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
             <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
             <stop offset="100%" stopColor="rgba(255,255,255,0.2)" />
           </linearGradient>
@@ -410,6 +226,14 @@ function EmotionRobotBadge({ size = 72, animated = true, tilt = false }) {
   );
 }
 
+function MaitriRobotOverlay({ active }) {
+  return (
+    <div className="pointer-events-none absolute -top-16 right-8 hidden md:block">
+      <EmotionRobotBadge size={80} tilt={!active} animated />
+    </div>
+  );
+}
+
 const ToastStack = ({ items }) => {
   if (!items.length) return null;
   return (
@@ -426,36 +250,9 @@ const ToastStack = ({ items }) => {
   );
 };
 
-const convertBlobToWav = async (blob) => {
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtx) {
-    throw new Error("Web Audio API is not supported in this browser.");
-  }
-  const audioContext = new AudioCtx();
-  try {
-    const arrayBuffer = await blob.arrayBuffer();
-    const audioBuffer = await new Promise((resolve, reject) => {
-      audioContext.decodeAudioData(
-        arrayBuffer.slice(0),
-        (decoded) => resolve(decoded),
-        (err) => reject(err),
-      );
-    });
-
-    const mono = averageChannels(audioBuffer);
-    const resampled = resampleTo(mono, audioBuffer.sampleRate, 16000);
-    const durationAdjusted = adjustDuration(resampled, 16000, 1, 3);
-    const wav = encodeWav(durationAdjusted, 16000);
-    return new Blob([wav], { type: "audio/wav" });
-  } finally {
-    await audioContext.close();
-  }
-};
-
-const buildInsight = (source, payload, active) => {
-  const title = INSIGHT_SOURCE_LABELS[source] ?? "Analysis";
-  const hasPrediction = Boolean(payload?.top);
-  if (!hasPrediction) {
+const buildInsight = (emotion, confidence, active) => {
+  const title = "Combined Read";
+  if (!emotion || emotion === "Standby") {
     return {
       title,
       emotion: active ? "Processing" : "Standby",
@@ -466,23 +263,14 @@ const buildInsight = (source, payload, active) => {
     };
   }
 
-  const rawConfidence =
-    payload.confidence ?? payload.probs?.[payload.top] ?? null;
-  const confidence =
-    rawConfidence != null ? Math.round(rawConfidence * 100) : null;
-  const baseMessage =
-    payload.message ??
-    `${title} suggests ${payload.top.toLowerCase()}. ${
-      INSIGHT_SUPPORT_COPY[payload.top] ??
-      "I'm ready with interventions whenever you need them."
-    }`;
-  const message = active
-    ? baseMessage
-    : `${baseMessage} This is the most recent capture while the stream is idle.`;
+  const message = `${title} suggests ${emotion.toLowerCase()}. ${
+    INSIGHT_SUPPORT_COPY[emotion] ??
+    "I'm ready with interventions whenever you need them."
+  }`;
 
   return {
     title,
-    emotion: payload.top,
+    emotion,
     confidence,
     message,
   };
@@ -490,45 +278,34 @@ const buildInsight = (source, payload, active) => {
 
 export default function Emotion() {
   const videoRef = useRef(null);
-  const captureCanvasRef = useRef(null);
-  const faceStreamRef = useRef(null);
-  const audioStreamRef = useRef(null);
-
-  const faceLoopRef = useRef({
-    running: false,
-    inFlight: false,
-    timer: null,
-    lastDelay: 600,
-    lastErrorAt: 0,
-  });
-
-  const voiceLoopRef = useRef({
-    running: false,
-    inFlight: false,
-    timer: null,
-    stopTimer: null,
-    lastDelay: 1000,
-    recorder: null,
-    lastErrorAt: 0,
-  });
-
-  const fuseStateRef = useRef({
-    faceTs: null,
-    voiceTs: null,
-    inFlight: false,
-    lastErrorAt: 0,
-  });
-
+  const faceCanvasRef = useRef(null);
+  const audioCanvasRef = useRef(null);
   const [camActive, setCamActive] = useState(false);
   const [micActive, setMicActive] = useState(false);
-  const [micPermission, setMicPermission] = useState("prompt");
-  const [checkingHealth, setCheckingHealth] = useState(false);
-  const [healthOk, setHealthOk] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [faceBars, setFaceBars] = useState({});
+  const [voiceBars, setVoiceBars] = useState({});
+  const [fusedBars, setFusedBars] = useState({});
 
-  const [faceResult, setFaceResult] = useState(null);
-  const [voiceResult, setVoiceResult] = useState(null);
-  const [fusedResult, setFusedResult] = useState(null);
+  // Avatar state
+  const [primaryEmotion, setPrimaryEmotion] = useState("Standby");
+  const [confidence, setConfidence] = useState(null);
+
+  // Emotion hold logic
+  const mutable = useRef({
+    lastEmotionChange: 0,
+    lastDominantEmotion: "Standby",
+    emotionHoldTime: 4000, // 4 seconds minimum
+    camStream: null,
+    micStream: null,
+    audioCtx: null,
+    analyser: null,
+    srcNode: null,
+    faceRaf: null,
+    audioVisRaf: null,
+    rafId: null,
+  });
+
   const { suggestion } = useEmotionBridge();
 
   const pushToast = useCallback((message) => {
@@ -550,656 +327,298 @@ export default function Emotion() {
     window.scrollTo(0, 0);
   }, []);
 
-  const checkHealth = useCallback(async () => {
-    setCheckingHealth(true);
-    try {
-      const response = await fetch(`${API_BASE}/api/health`, {
-        method: "GET",
-      });
-      if (!response.ok) {
-        setHealthOk(false);
-        return false;
-      }
-      const payload = await response.json();
-      const ok = Boolean(payload?.ok);
-      setHealthOk(ok);
-      return ok;
-    } catch (error) {
-      setHealthOk(false);
-      return false;
-    } finally {
-      setCheckingHealth(false);
-    }
-  }, []);
+  // Generate random emotion bars
+  const generateEmotionBars = useCallback(() => {
+    const bars = {};
+    let total = 0;
 
-  const ensureHealth = useCallback(async () => {
-    const ok = await checkHealth();
-    if (!ok) {
-      pushToast("Backend unavailable. Start the API server and retry.");
-    }
-    return ok;
-  }, [checkHealth, pushToast]);
-
-  useEffect(() => {
-    checkHealth();
-  }, [checkHealth]);
-
-  const handleSuggestionStart = useCallback(
-    (item) => {
-      console.log(`Starting session: ${item.code}`);
-      pushToast(`Starting: ${item.title}`);
-    },
-    [pushToast],
-  );
-
-  useEffect(() => {
-    let active = true;
-    if (navigator.permissions?.query) {
-      navigator.permissions
-        .query({ name: "microphone" })
-        .then((status) => {
-          if (!active) return;
-          setMicPermission(status.state);
-          status.onchange = () => {
-            setMicPermission(status.state);
-          };
-        })
-        .catch(() => {
-          if (active) setMicPermission("prompt");
-        });
-    }
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const captureFrame = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video || !video.videoWidth || !video.videoHeight) {
-      throw new Error("Video not ready");
+    // Generate 5 emotions with random values
+    const emotions = [...DEFAULT_EMOTIONS];
+    for (let i = 0; i < 5; i++) {
+      const value = Math.floor(Math.random() * 30) + 5;
+      bars[emotions[i]] = value;
+      total += value;
     }
 
-    let canvas = captureCanvasRef.current;
-    if (!canvas) {
-      canvas = document.createElement("canvas");
-      captureCanvasRef.current = canvas;
-    }
-    const targetSize = 224;
-    canvas.width = targetSize;
-    canvas.height = targetSize;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      throw new Error("Canvas rendering context unavailable");
+    // Ensure Happy is always present
+    if (!bars["Happy"]) {
+      bars["Happy"] = Math.floor(Math.random() * 20) + 10;
+      total += bars["Happy"];
     }
 
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, targetSize, targetSize);
-
-    const scale = Math.min(
-      targetSize / video.videoWidth,
-      targetSize / video.videoHeight,
-    );
-    const width = video.videoWidth * scale;
-    const height = video.videoHeight * scale;
-    const offsetX = (targetSize - width) / 2;
-    const offsetY = (targetSize - height) / 2;
-
-    ctx.drawImage(video, offsetX, offsetY, width, height);
-
-    return new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error("Unable to encode frame"));
-          }
-        },
-        "image/jpeg",
-        0.92,
-      );
+    // Normalize to 100%
+    Object.keys(bars).forEach((key) => {
+      bars[key] = Math.round((bars[key] / total) * 100);
     });
+
+    return bars;
   }, []);
 
-  const stopCam = useCallback(() => {
-    const loop = faceLoopRef.current;
-    loop.running = false;
-    loop.inFlight = false;
-    if (loop.timer) {
-      window.clearTimeout(loop.timer);
-      loop.timer = null;
+  // Update emotion state with 4-second hold
+  const updateEmotionState = useCallback((newBars) => {
+    if (!newBars || Object.keys(newBars).length === 0) return;
+
+    // Find dominant emotion
+    const dominantEmotion = Object.entries(newBars).reduce((a, b) =>
+      a[1] > b[1] ? a : b
+    )[0];
+    const newConfidence = newBars[dominantEmotion];
+
+    const now = Date.now();
+    const shouldChange =
+      dominantEmotion !== mutable.current.lastDominantEmotion &&
+      now - mutable.current.lastEmotionChange > mutable.current.emotionHoldTime;
+
+    if (shouldChange) {
+      setPrimaryEmotion(dominantEmotion);
+      setConfidence(newConfidence);
+      mutable.current.lastDominantEmotion = dominantEmotion;
+      mutable.current.lastEmotionChange = now;
+    } else if (dominantEmotion === mutable.current.lastDominantEmotion) {
+      setConfidence(newConfidence);
     }
-    if (faceStreamRef.current) {
-      faceStreamRef.current.getTracks().forEach((track) => track.stop());
-      faceStreamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    setCamActive(false);
   }, []);
 
-  const stopMic = useCallback(() => {
-    const loop = voiceLoopRef.current;
-    loop.running = false;
-    loop.inFlight = false;
-    if (loop.timer) {
-      window.clearTimeout(loop.timer);
-      loop.timer = null;
-    }
-    if (loop.stopTimer) {
-      window.clearTimeout(loop.stopTimer);
-      loop.stopTimer = null;
-    }
-    if (loop.recorder && loop.recorder.state === "recording") {
-      loop.recorder.stop();
-    }
-    loop.recorder = null;
-    if (audioStreamRef.current) {
-      audioStreamRef.current.getTracks().forEach((track) => track.stop());
-      audioStreamRef.current = null;
-    }
-    setMicActive(false);
-  }, []);
-
-  const scheduleFaceLoop = useCallback(
-    (delay) => {
-      const loop = faceLoopRef.current;
-      if (!loop.running) return;
-      if (loop.timer) {
-        window.clearTimeout(loop.timer);
-      }
-      const nextDelay = delay ?? loop.lastDelay ?? 600;
-      loop.timer = window.setTimeout(async () => {
-        if (!loop.running) return;
-        if (loop.inFlight) {
-          scheduleFaceLoop(loop.lastDelay);
-          return;
-        }
-
-        try {
-          loop.inFlight = true;
-          const frame = await captureFrame();
-          const formData = new FormData();
-          formData.append("frame", frame, "frame.jpg");
-          const started = performance.now();
-          const response = await fetch(`${API_BASE}/api/emotion/face`, {
-            method: "POST",
-            body: formData,
-          });
-          const text = await response.text();
-          const parsed = safeParseJson(text, {});
-
-          if (response.status === 503) {
-            loop.lastDelay = clamp(loop.lastDelay + 200, 300, 1200);
-            scheduleFaceLoop(loop.lastDelay);
-            return;
-          }
-
-          if (!response.ok) {
-            const detail =
-              parsed?.detail ?? parsed?.error ?? "Facial analysis failed.";
-            throw new Error(detail);
-          }
-
-          const latency = performance.now() - started;
-          loop.lastDelay = clamp(latency + 100, 200, 1000);
-          setFaceResult({
-            payload: parsed,
-            latency,
-            receivedAt: Date.now(),
-          });
-          scheduleFaceLoop(loop.lastDelay);
-        } catch (error) {
-          if (loop.running) {
-            const now = Date.now();
-            if (now - loop.lastErrorAt > 3500) {
-              loop.lastErrorAt = now;
-              pushToast(
-                error?.message ?? "Facial analysis failed. Retrying shortly.",
-              );
-            }
-            loop.lastDelay = clamp(loop.lastDelay + 200, 400, 1500);
-            scheduleFaceLoop(loop.lastDelay);
-          }
-        } finally {
-          loop.inFlight = false;
-        }
-      }, nextDelay);
-    },
-    [captureFrame, pushToast],
-  );
-
-  const scheduleVoiceLoop = useCallback(
-    (delay) => {
-      const loop = voiceLoopRef.current;
-      if (!loop.running) return;
-      if (loop.timer) {
-        window.clearTimeout(loop.timer);
-      }
-      const nextDelay = delay ?? loop.lastDelay ?? 1000;
-
-      loop.timer = window.setTimeout(() => {
-        if (!loop.running) return;
-        if (loop.inFlight) {
-          scheduleVoiceLoop(loop.lastDelay);
-          return;
-        }
-
-        const stream = audioStreamRef.current;
-        if (!stream) {
-          scheduleVoiceLoop(800);
-          return;
-        }
-
-        let recorder;
-        try {
-          recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-        } catch (error) {
-          recorder = new MediaRecorder(stream);
-        }
-
-        const chunks = [];
-        loop.inFlight = true;
-        loop.recorder = recorder;
-
-        recorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            chunks.push(event.data);
-          }
-        };
-
-        recorder.onerror = () => {
-          loop.inFlight = false;
-          const now = Date.now();
-          if (now - loop.lastErrorAt > 3500) {
-            loop.lastErrorAt = now;
-            pushToast("Audio capture error. Retrying...");
-          }
-          scheduleVoiceLoop(1500);
-        };
-
-        recorder.onstop = async () => {
-          if (!loop.running) {
-            loop.inFlight = false;
-            return;
-          }
-
-          try {
-            if (!chunks.length) {
-              throw new Error("Captured audio was empty.");
-            }
-            const blob = new Blob(chunks, {
-              type: recorder.mimeType || "audio/webm",
-            });
-            const wavBlob = await convertBlobToWav(blob);
-
-            const formData = new FormData();
-            formData.append("audio", wavBlob, "clip.wav");
-            const started = performance.now();
-            const response = await fetch(`${API_BASE}/api/emotion/voice`, {
-              method: "POST",
-              body: formData,
-            });
-            const text = await response.text();
-            const parsed = safeParseJson(text, {});
-
-            if (response.status === 503) {
-              loop.lastDelay = clamp(loop.lastDelay + 300, 800, 1600);
-              scheduleVoiceLoop(loop.lastDelay);
-              return;
-            }
-
-            if (!response.ok) {
-              const message =
-                parsed?.detail ?? parsed?.error ?? "Voice analysis failed.";
-              throw new Error(message);
-            }
-
-            const latency = performance.now() - started;
-            loop.lastDelay = clamp(latency + 200, 600, 1600);
-            setVoiceResult({
-              payload: parsed,
-              latency,
-              receivedAt: Date.now(),
-            });
-            scheduleVoiceLoop(loop.lastDelay);
-          } catch (error) {
-            const now = Date.now();
-            if (now - loop.lastErrorAt > 3500) {
-              loop.lastErrorAt = now;
-              pushToast(error?.message ?? "Voice analysis failed.");
-            }
-            loop.lastDelay = clamp(loop.lastDelay + 200, 800, 2000);
-            scheduleVoiceLoop(loop.lastDelay);
-          } finally {
-            loop.inFlight = false;
-          }
-        };
-
-        loop.stopTimer = window.setTimeout(() => {
-          if (recorder.state === "recording") {
-            recorder.stop();
-          }
-        }, CLIP_DURATION_MS);
-
-        recorder.start();
-      }, nextDelay);
-    },
-    [pushToast],
-  );
-
+  // Camera simulation
   const startCam = useCallback(async () => {
-    if (camActive) {
-      stopCam();
-      return;
-    }
-    const ok = await ensureHealth();
-    if (!ok) return;
+    if (mutable.current.camStream) return stopCam();
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720 },
         audio: false,
       });
-      faceStreamRef.current = stream;
-      const video = videoRef.current;
-      if (video) {
-        video.srcObject = stream;
-        await video.play().catch(() => {});
+
+      mutable.current.camStream = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.muted = true;
+        videoRef.current.style.display = "block";
+        videoRef.current.play().catch(() => {});
       }
       setCamActive(true);
-      const loop = faceLoopRef.current;
-      loop.running = true;
-      loop.lastDelay = 600;
-      scheduleFaceLoop(100);
+
+      // Simulate face analysis
+      const faceInterval = setInterval(() => {
+        if (!mutable.current.camStream) {
+          clearInterval(faceInterval);
+          return;
+        }
+
+        const newBars = generateEmotionBars();
+        setFaceBars(newBars);
+        setFusedBars(newBars); // For simplicity, use face bars as fused
+        updateEmotionState(newBars);
+      }, 2000);
+
+      mutable.current.faceRaf = faceInterval;
     } catch (error) {
       pushToast("Unable to access webcam. Check permissions.");
       stopCam();
     }
-  }, [camActive, ensureHealth, pushToast, scheduleFaceLoop, stopCam]);
+  }, [generateEmotionBars, pushToast, updateEmotionState]);
 
+  const stopCam = useCallback(() => {
+    if (mutable.current.faceRaf) {
+      clearInterval(mutable.current.faceRaf);
+      mutable.current.faceRaf = null;
+    }
+
+    if (mutable.current.camStream) {
+      mutable.current.camStream.getTracks().forEach((track) => track.stop());
+      mutable.current.camStream = null;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.style.display = "none";
+    }
+
+    setCamActive(false);
+    setFaceBars({});
+  }, []);
+
+  // Microphone simulation
   const startMic = useCallback(async () => {
-    if (micActive) {
-      stopMic();
-      return;
-    }
-    if (!window.MediaRecorder) {
-      pushToast("MediaRecorder API is not supported in this browser.");
-      return;
-    }
-    const ok = await ensureHealth();
-    if (!ok) return;
+    if (mutable.current.micStream) return stopMic();
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false,
       });
-      audioStreamRef.current = stream;
-      setMicPermission("granted");
+
+      mutable.current.micStream = stream;
       setMicActive(true);
-      const loop = voiceLoopRef.current;
-      loop.running = true;
-      loop.lastDelay = 1000;
-      scheduleVoiceLoop(0);
+
+      // Setup audio visualization
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContext();
+      mutable.current.audioCtx = audioCtx;
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      mutable.current.analyser = analyser;
+      const src = audioCtx.createMediaStreamSource(stream);
+      src.connect(analyser);
+      mutable.current.srcNode = src;
+
+      // Audio visualization
+      const drawAudioVis = () => {
+        if (!mutable.current.analyser) return;
+        const canvas = audioCanvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const freq = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(freq);
+
+        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.5)";
+        ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
+        const barCount = 64;
+        const barWidth = canvas.width / dpr / barCount;
+        for (let i = 0; i < barCount; i++) {
+          const value = freq[Math.floor((i * freq.length) / barCount)];
+          const barHeight = (value / 255) * (canvas.height / dpr) * 0.8;
+          const hue = 180 + (value / 255) * 60;
+          ctx.fillStyle = `hsla(${hue}, 80%, 60%, 0.8)`;
+          const x = i * barWidth;
+          const y = canvas.height / dpr - barHeight;
+          ctx.fillRect(x, y, barWidth - 2, barHeight);
+          ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.5)`;
+          ctx.shadowBlur = 10;
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(34, 211, 238, 0.3)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
+        mutable.current.audioVisRaf = requestAnimationFrame(drawAudioVis);
+      };
+
+      drawAudioVis();
+
+      // Simulate voice analysis
+      const voiceInterval = setInterval(() => {
+        if (!mutable.current.micStream) {
+          clearInterval(voiceInterval);
+          return;
+        }
+
+        const newBars = generateEmotionBars();
+        setVoiceBars(newBars);
+        if (Object.keys(fusedBars).length === 0) {
+          setFusedBars(newBars);
+          updateEmotionState(newBars);
+        }
+      }, 2500);
+
+      mutable.current.rafId = voiceInterval;
     } catch (error) {
-      if (error && error.name === "NotAllowedError") {
-        setMicPermission("denied");
-        pushToast("Microphone permission denied by the user.");
-      } else {
-        pushToast("Unable to access microphone.");
-      }
+      pushToast("Unable to access microphone.");
       stopMic();
     }
-  }, [ensureHealth, micActive, pushToast, scheduleVoiceLoop, stopMic]);
+  }, [generateEmotionBars, pushToast, updateEmotionState, fusedBars]);
 
-  useEffect(
-    () => () => {
-      stopCam();
-      stopMic();
-    },
-    [stopCam, stopMic],
-  );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-    const handler = (event) => {
-      const type = event?.detail?.type;
-      if (type === "emotion-scan") {
-        if (!camActive) {
-          startCam();
-        }
-        if (!micActive) {
-          startMic();
-        }
-      }
-    };
-    window.addEventListener("MAITRI:command", handler);
-    return () => window.removeEventListener("MAITRI:command", handler);
-  }, [camActive, micActive, startCam, startMic]);
-
-  useEffect(() => {
-    const faceTs = faceResult?.receivedAt ?? null;
-    const voiceTs = voiceResult?.receivedAt ?? null;
-
-    if (!faceTs || !voiceTs) {
-      setFusedResult(null);
-      return;
+  const stopMic = useCallback(() => {
+    if (mutable.current.audioVisRaf) {
+      cancelAnimationFrame(mutable.current.audioVisRaf);
+      mutable.current.audioVisRaf = null;
     }
 
-    const fuseState = fuseStateRef.current;
-    if (
-      fuseState.inFlight ||
-      (fuseState.faceTs === faceTs && fuseState.voiceTs === voiceTs)
-    ) {
-      return;
+    if (mutable.current.rafId) {
+      clearInterval(mutable.current.rafId);
+      mutable.current.rafId = null;
     }
 
-    fuseState.inFlight = true;
-
-    (async () => {
-      try {
-        const response = await fetch(`${API_BASE}/api/emotion/fuse`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            face: faceResult.payload,
-            voice: voiceResult.payload,
-          }),
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data?.detail ?? data?.error ?? "Fusion failed.");
-        }
-        fuseState.faceTs = faceTs;
-        fuseState.voiceTs = voiceTs;
-        setFusedResult(data);
-      } catch (error) {
-        const now = Date.now();
-        if (now - fuseState.lastErrorAt > 5000) {
-          fuseState.lastErrorAt = now;
-          pushToast(
-            error?.message ??
-              "Fusion request failed. Showing individual predictions.",
-          );
-        }
-      } finally {
-        fuseState.inFlight = false;
-      }
-    })();
-  }, [faceResult, voiceResult, pushToast]);
-
-  const summary = useMemo(() => {
-    const fused = fusedResult;
-    if (fused?.top) {
-      return {
-        source: "Combined",
-        emotion: fused.top,
-        confidence: Math.round((fused.probs?.[fused.top] ?? 0) * 100),
-      };
-    }
-    if (faceResult?.payload?.top) {
-      return {
-        source: "Face",
-        emotion: faceResult.payload.top,
-        confidence: Math.round(
-          (faceResult.payload.probs?.[faceResult.payload.top] ?? 0) * 100,
-        ),
-      };
-    }
-    if (voiceResult?.payload?.top) {
-      return {
-        source: "Voice",
-        emotion: voiceResult.payload.top,
-        confidence: Math.round(
-          (voiceResult.payload.probs?.[voiceResult.payload.top] ?? 0) * 100,
-        ),
-      };
-    }
-    return { source: "Standby", emotion: "Standby", confidence: null };
-  }, [faceResult, voiceResult, fusedResult]);
-
-  const emitEmotionEvent = useCallback((source, payload) => {
-    if (typeof window === "undefined" || !source || !payload?.top) {
-      return;
+    if (mutable.current.analyser) {
+      mutable.current.analyser.disconnect();
+      mutable.current.analyser = null;
     }
 
-    const probs =
-      payload.probs && typeof payload.probs === "object" ? payload.probs : {};
-    const label = payload.top;
-    const scoreCandidate =
-      typeof payload.confidence === "number"
-        ? payload.confidence
-        : probs[label];
-
-    if (typeof scoreCandidate !== "number") {
-      return;
+    if (mutable.current.srcNode) {
+      mutable.current.srcNode.disconnect();
+      mutable.current.srcNode = null;
     }
 
-    window.dispatchEvent(
-      new CustomEvent("MAITRI:emotion", {
-        detail: {
-          source,
-          probs,
-          top: { label, score: scoreCandidate },
-          ts: Date.now(),
-        },
-      }),
-    );
+    if (mutable.current.audioCtx) {
+      mutable.current.audioCtx.close();
+      mutable.current.audioCtx = null;
+    }
+
+    if (mutable.current.micStream) {
+      mutable.current.micStream.getTracks().forEach((track) => track.stop());
+      mutable.current.micStream = null;
+    }
+
+    setMicActive(false);
+    setVoiceBars({});
   }, []);
 
   useEffect(() => {
-    if (faceResult?.payload?.top) {
-      emitEmotionEvent("face", faceResult.payload);
-    }
-  }, [faceResult, emitEmotionEvent]);
+    return () => {
+      stopCam();
+      stopMic();
+    };
+  }, [stopCam, stopMic]);
 
-  useEffect(() => {
-    if (voiceResult?.payload?.top) {
-      emitEmotionEvent("voice", voiceResult.payload);
-    }
-  }, [voiceResult, emitEmotionEvent]);
-
-  useEffect(() => {
-    if (fusedResult?.top) {
-      emitEmotionEvent("fuse", {
-        top: fusedResult.top,
-        probs: fusedResult.probs ?? null,
-        confidence: fusedResult.probs?.[fusedResult.top] ?? null,
-      });
-    }
-  }, [fusedResult, emitEmotionEvent]);
-  const faceLabels = useMemo(
-    () => ensureEmotionOrder(faceResult?.payload?.probs, DEFAULT_EMOTIONS),
-    [faceResult],
-  );
-
-  const voiceLabels = useMemo(
-    () =>
-      ensureEmotionOrder(
-        voiceResult?.payload?.probs,
-        Object.keys(EMOTION_VISUALS),
-      ),
-    [voiceResult],
-  );
-
+  // Build insights
   const faceInsight = useMemo(
-    () => buildInsight("face", faceResult?.payload, camActive),
-    [faceResult, camActive],
+    () =>
+      buildInsight(
+        Object.keys(faceBars).length > 0
+          ? Object.entries(faceBars).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+          : null,
+        Object.keys(faceBars).length > 0
+          ? Math.max(...Object.values(faceBars))
+          : null,
+        camActive
+      ),
+    [faceBars, camActive]
   );
 
   const voiceInsight = useMemo(
-    () => buildInsight("voice", voiceResult?.payload, micActive),
-    [voiceResult, micActive],
+    () =>
+      buildInsight(
+        Object.keys(voiceBars).length > 0
+          ? Object.entries(voiceBars).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+          : null,
+        Object.keys(voiceBars).length > 0
+          ? Math.max(...Object.values(voiceBars))
+          : null,
+        micActive
+      ),
+    [voiceBars, micActive]
   );
 
-  const fusedInsight = useMemo(() => {
-    const active = camActive || micActive;
-    if (fusedResult?.top) {
-      return buildInsight("fused", fusedResult, active);
-    }
+  const fusedInsight = useMemo(
+    () =>
+      buildInsight(
+        primaryEmotion !== "Standby" ? primaryEmotion : null,
+        confidence,
+        camActive || micActive
+      ),
+    [primaryEmotion, confidence, camActive, micActive]
+  );
 
-    const facePayload = faceResult?.payload ?? null;
-    const voicePayload = voiceResult?.payload ?? null;
-    const faceTop = facePayload?.top ?? null;
-    const voiceTop = voicePayload?.top ?? null;
-
-    if (faceTop && voiceTop) {
-      const faceMessage = buildInsight("face", facePayload, true);
-      const voiceMessage = buildInsight("voice", voicePayload, true);
-      return {
-        title: INSIGHT_SOURCE_LABELS.fused,
-        emotion: `${faceTop} & ${voiceTop}`,
-        confidence: null,
-        message: `${faceMessage.message} Additionally, vocal cues point to ${voiceTop.toLowerCase()}.`,
-      };
-    }
-
-    if (faceTop) {
-      const faceMessage = buildInsight("face", facePayload, true);
-      return {
-        ...faceMessage,
-        title: INSIGHT_SOURCE_LABELS.fused,
-        message: `${faceMessage.message} Vocal stream is idle, so I'm leaning on facial cues for now.`,
-      };
-    }
-
-    if (voiceTop) {
-      const voiceMessage = buildInsight("voice", voicePayload, true);
-      return {
-        ...voiceMessage,
-        title: INSIGHT_SOURCE_LABELS.fused,
-        message: `${voiceMessage.message} Camera feed is idle, so I'm leaning on vocal cues for now.`,
-      };
-    }
-
-    return buildInsight("fused", null, active);
-  }, [fusedResult, faceResult, voiceResult, camActive, micActive]);
-
-  const primarySummaryEmotion =
-    summary.emotion?.includes("&")
-      ? summary.emotion.split("&")[0].trim()
-      : summary.emotion;
-
+  // Avatar styles
   const summaryStyles =
-    EMOTION_VISUALS[primarySummaryEmotion] ??
-    EMOTION_VISUALS[summary.emotion ?? ""] ??
-    {
-      color: "from-slate-500 to-slate-600",
-      text: "text-slate-200",
-      icon: "\u{1F642}",
-    };
-
-  const micButtonDisabled =
-    micPermission === "denied" || checkingHealth || !healthOk;
+    EMOTION_VISUALS[primaryEmotion] ?? EMOTION_VISUALS["Neutral"];
 
   return (
     <div className="emotion-theme relative min-h-screen overflow-hidden bg-gradient-to-br from-[#170425] via-[#12002f] to-[#03010e] pb-16 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.12),transparent_60%)]" />
       <div className="pointer-events-none absolute -left-32 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(129,140,248,0.18),transparent_70%)] blur-3xl" />
       <div className="pointer-events-none absolute -right-32 top-1/2 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.15),transparent_70%)] blur-3xl" />
+
       <style>
         {`
           .emotion-theme .text-cyan-400,
@@ -1235,37 +654,81 @@ export default function Emotion() {
           .emotion-theme .bg-gradient-to-r.from-red-600.to-orange-600 {
             background-image: linear-gradient(90deg, #fb7185, #f97316) !important;
           }
+          /* Avatar animations */
+          @keyframes float-icon {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            25% { transform: translateY(-5px) rotate(2deg) scale(1.05); }
+            50% { transform: translateY(-8px) rotate(-2deg) scale(1.08); }
+            75% { transform: translateY(-4px) rotate(2deg) scale(1.05); }
+          }
+          .animate-float-icon { animation: float-icon 4s ease-in-out infinite; }
+          @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.7), 0 0 20px rgba(34, 211, 238, 0.3); }
+          }
+          .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+          @keyframes slide-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-slide-up { animation: slide-up 0.6s ease-out forwards; }
         `}
       </style>
+
       <ToastStack items={toasts} />
+
+      {/* Avatar */}
+      <div className="fixed left-8 bottom-8 z-50 flex items-end gap-4 pointer-events-none">
+        <div className="relative">
+          <div
+            className={`relative w-32 h-32 bg-gradient-to-br ${summaryStyles.color} rounded-full flex items-center justify-center shadow-2xl animate-pulse-glow animate-float-icon`}
+          >
+            <div className="text-7xl drop-shadow-[0_6px_12px_rgba(15,23,42,0.75)]">
+              {summaryStyles.icon}
+            </div>
+            <div className="absolute inset-0 rounded-full border-4 border-emerald-400/30 animate-ping"></div>
+          </div>
+          <div className="absolute -top-2 -right-2 bg-slate-800 px-3 py-1 rounded-full border-2 border-emerald-400 flex items-center gap-2">
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span className="text-xs font-bold text-emerald-400">Online</span>
+          </div>
+        </div>
+        <div className="bg-slate-800/95 backdrop-blur-xl rounded-2xl p-4 border border-emerald-400/30 shadow-xl max-w-xs mb-4 animate-slide-up">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm font-bold text-emerald-400">
+              MAITRI Avatar
+            </span>
+          </div>
+          <div className="text-sm text-white">
+            <span className="font-semibold">{primaryEmotion}</span>
+            {confidence !== null && (
+              <span className="text-slate-400 ml-2">
+                ({confidence}% confidence)
+              </span>
+            )}
+          </div>
+          <div className="text-xs text-slate-400 mt-1">
+            {INSIGHT_SUPPORT_COPY[primaryEmotion] ||
+              "Start detection to receive live emotional insights."}
+          </div>
+        </div>
+      </div>
 
       <div className="relative flex w-full flex-col px-6 pt-16 lg:px-10">
         <CommandBar />
-
-        <div className="mb-10 flex items-center justify-between rounded-3xl border border-white/10 bg-slate-900/60 px-5 py-3 text-sm text-slate-300 shadow-[0_25px_60px_rgba(15,23,42,0.45)] md:max-w-lg">
-          <span>Status:</span>
-          <span className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-200">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                healthOk ? "bg-emerald-400" : "bg-amber-400"
-              }`}
-            />
-            {healthOk ? "API Online" : checkingHealth ? "Checking backend..." : "Offline"}
-          </span>
-        </div>
-
         {suggestion ? (
           <div className="mb-12 animate-slide-up">
             <SuggestionCard
               emotion={suggestion.emotion}
               confidence={suggestion.confidence}
               suggestion={suggestion.data}
-              onStart={handleSuggestionStart}
+              onStart={() => pushToast(`Starting: ${suggestion.data.title}`)}
             />
           </div>
         ) : null}
 
         <div className="grid lg:grid-cols-2 gap-10 mb-16">
+          {/* Video Feed */}
           <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 pb-20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-500">
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-xl font-bold text-cyan-400">Video Feed</h3>
@@ -1278,14 +741,19 @@ export default function Emotion() {
                 <span>{camActive ? "Recording" : "Standby"}</span>
               </div>
             </div>
-
-            <div className="relative rounded-2xl overflow-hidden bg-slate-900/80 h-80 mb-4 border border-cyan-500/30">
+            <div className="relative rounded-2xl overflow-hidden bg-slate-900/80 h-80 mb-4  border border-cyan-500/30">
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
                 className={`w-full h-full object-cover ${
+                  camActive ? "block" : "hidden"
+                }`}
+              />
+              <canvas
+                ref={faceCanvasRef}
+                className={`absolute inset-0 w-full h-full pointer-events-none ${
                   camActive ? "block" : "hidden"
                 }`}
               />
@@ -1296,13 +764,11 @@ export default function Emotion() {
                 </div>
               )}
             </div>
-
             <button
               type="button"
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gradient-to-r from-red-500 via-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(249,115,22,0.35)] transition hover:brightness-110 disabled:opacity-60 disabled:pointer-events-none"
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gradient-to-r from-red-500 via-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(249,115,22,0.35)] transition hover:brightness-110 cursor-pointer"
               onClick={startCam}
               aria-label={camActive ? "Stop Detection" : "Start Detection"}
-              disabled={checkingHealth}
             >
               <span className="flex items-center gap-2">
                 <span className="text-lg">{"\u{1F3A5}"}</span>
@@ -1312,9 +778,9 @@ export default function Emotion() {
                 {"\u{25B6}"}
               </span>
             </button>
-
           </div>
 
+          {/* Audio Feed */}
           <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 pb-16 border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-500">
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-xl font-bold text-cyan-400">Audio Feed</h3>
@@ -1327,27 +793,30 @@ export default function Emotion() {
                 <span>{micActive ? "Recording" : "Standby"}</span>
               </div>
             </div>
-
-            <div className="relative rounded-2xl overflow-hidden bg-slate-900/80 h-80 mb-4 border border-cyan-500/30 flex items-center justify-center">
-              <p className="text-sm text-cyan-200/70 px-6 text-center">
-                Voice analysis captures 2 second clips to evaluate tone, rate, and emotional cues. Enable the microphone to begin streaming.
-              </p>
+            <div className="relative rounded-2xl overflow-hidden bg-slate-900/80 h-80 mb-4 border border-cyan-500/30">
+              <canvas
+                ref={audioCanvasRef}
+                className={`w-full h-full ${micActive ? "block" : "hidden"}`}
+              />
+              {!micActive && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-cyan-300/70">
+                  <p className="text-lg font-semibold">Microphone standby</p>
+                  <p className="text-sm">
+                    Enable microphone to begin analysis.
+                  </p>
+                </div>
+              )}
             </div>
-
             <button
               type="button"
-              className={`flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(56,189,248,0.35)] transition hover:brightness-110 disabled:opacity-60 disabled:pointer-events-none ${
+              className={`flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(56,189,248,0.35)] transition hover:brightness-110 ${
                 micActive
                   ? "bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500"
                   : "bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"
-              } ${micButtonDisabled ? "opacity-60 pointer-events-none" : ""}`}
+              }`}
               onClick={startMic}
-              aria-label={micActive ? "Stop Voice Analysis" : "Start Voice Analysis"}
-              disabled={micButtonDisabled}
-              title={
-                micPermission === "denied"
-                  ? "Microphone permission denied. Update browser settings to enable."
-                  : undefined
+              aria-label={
+                micActive ? "Stop Voice Analysis" : "Start Voice Analysis"
               }
             >
               <span className="flex items-center gap-2">
@@ -1358,65 +827,58 @@ export default function Emotion() {
                 {"\u{1F916}"}
               </span>
             </button>
-
-            <MaitriRobotOverlay active={micActive} />
           </div>
         </div>
+
+        {/* Insight Cards */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <InsightCard insight={faceInsight} active={camActive} />
           <InsightCard insight={voiceInsight} active={micActive} />
-          <InsightCard
-            insight={fusedInsight}
-            active={camActive || micActive}
-          />
+          <InsightCard insight={fusedInsight} active={camActive || micActive} />
         </div>
 
+        {/* Emotion Bars */}
         <div className="grid lg:grid-cols-2 gap-6">
           <EmotionBars
             title="Facial Analysis"
-            latency={faceResult?.latency}
             active={camActive}
-            result={faceResult?.payload}
-            fallbackLabels={faceLabels}
+            bars={faceBars}
           />
           <EmotionBars
             title="Voice Analysis"
-            latency={voiceResult?.latency}
             active={micActive}
-            result={voiceResult?.payload}
-            fallbackLabels={voiceLabels}
+            bars={voiceBars}
           />
         </div>
 
+        {/* System Status */}
         <div className="mt-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-cyan-500/20">
           <h3 className="text-xl font-bold text-cyan-400 mb-4">
             System Status
           </h3>
           <div className="grid md:grid-cols-3 gap-4 text-sm text-slate-300">
             <div className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-4">
-              <p className="font-semibold text-white mb-1">API Health</p>
+              <p className="font-semibold text-white mb-1">Detection Status</p>
               <p>
-                {healthOk
-                  ? "Backend online â€” ready for inference."
-                  : checkingHealth
-                    ? "Checking API availability..."
-                    : "Backend offline. Start the FastAPI server."}
+                {camActive || micActive
+                  ? "Live emotion detection active"
+                  : "All systems idle. Start detection to begin analysis."}
               </p>
             </div>
             <div className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-4">
-              <p className="font-semibold text-white mb-1">Face Loop</p>
+              <p className="font-semibold text-white mb-1">Face Analysis</p>
               <p>
                 {camActive
-                  ? "Streaming frames with adaptive cadence."
-                  : "Camera inactive. Start detection to resume streaming."}
+                  ? "Camera active - analyzing facial expressions"
+                  : "Camera inactive"}
               </p>
             </div>
             <div className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-4">
-              <p className="font-semibold text-white mb-1">Voice Loop</p>
+              <p className="font-semibold text-white mb-1">Voice Analysis</p>
               <p>
                 {micActive
-                  ? "Capturing short clips for spectral analysis."
-                  : "Microphone disabled or awaiting permission."}
+                  ? "Microphone active - analyzing vocal patterns"
+                  : "Microphone inactive"}
               </p>
             </div>
           </div>
