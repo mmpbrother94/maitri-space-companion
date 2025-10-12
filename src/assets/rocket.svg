@@ -1,0 +1,22 @@
+<svg width="120" height="220" viewBox="0 0 120 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rocket-body" x1="60" y1="0" x2="60" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E0F2FE"/>
+      <stop offset="1" stop-color="#94A3B8"/>
+    </linearGradient>
+    <linearGradient id="rocket-window" x1="60" y1="54" x2="60" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="rocket-fin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+  </defs>
+  <path d="M60 10C35 42 26 86 24 142H96C94 86 85 42 60 10Z" fill="url(#rocket-body)"/>
+  <path d="M60 48C50.0589 48 42 56.0589 42 66C42 75.9411 50.0589 84 60 84C69.9411 84 78 75.9411 78 66C78 56.0589 69.9411 48 60 48Z" fill="url(#rocket-window)"/>
+  <path d="M24 142L12 188C24 178 37 171 52 168L60 142H24Z" fill="url(#rocket-fin)"/>
+  <path d="M96 142H60L68 168C83 171 96 178 108 188L96 142Z" fill="url(#rocket-fin)"/>
+  <path d="M52 168C56 182 57 198 57 214C57 216 58.7909 218 61 218C63.2091 218 65 216 65 214C65 198 66 180 68 168H52Z" fill="#F97316"/>
+  <path d="M60 0C53 12 48 24 46 38L74 38C72 24 67 12 60 0Z" fill="#E0F2FE"/>
+</svg>
